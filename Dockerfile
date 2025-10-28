@@ -9,9 +9,14 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     zip \
     unzip \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Instalar extensión MongoDB
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
