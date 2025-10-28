@@ -4,9 +4,6 @@ services:
   # Web Service - Laravel Application
   - type: web
     name: ModuloUsuario
-    runtime: php
-    plan: free  # Free tier
-    region: oregon  # or frankfurt, singapore, etc.
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       npm ci
