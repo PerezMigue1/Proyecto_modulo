@@ -26,6 +26,13 @@ class User extends Authenticatable
     protected $collection = 'usuario';
 
     /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = '_id';
+
+    /**
      * Set the table name to prevent Laravel from pluralizing it.
      *
      * @var string
@@ -33,6 +40,27 @@ class User extends Authenticatable
     public function getTable()
     {
         return 'usuario';
+    }
+
+    /**
+     * Find a user by email for authentication.
+     *
+     * @param  string  $email
+     * @return \App\Models\User|null
+     */
+    public function findForAuthentication($email)
+    {
+        return $this->where('email', $email)->first();
+    }
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'email';
     }
 
     /**
@@ -47,6 +75,7 @@ class User extends Authenticatable
         'pregunta_secreta',
         'respuesta_secreta',
         'telefono',
+        'google_id',
     ];
 
     /**

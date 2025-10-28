@@ -41,6 +41,15 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
         
+        // Usar email como campo de autenticación
+        Fortify::authenticateUsing(function ($request) {
+            $user = \App\Models\User::where('email', $request->email)->first();
+
+            if ($user && \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                return $user;
+            }
+        });
+        
         // Redirigir al login después del registro (no hacer login automático)
         Fortify::registerView(function () {
             // Obtener las preguntas secretas desde MongoDB
