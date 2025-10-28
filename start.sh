@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# NO usar set -e para continuar aunque falle algo
 
 echo "=== Iniciando aplicacion Laravel ==="
 
@@ -11,7 +11,11 @@ fi
 
 # Siempre generar APP_KEY
 echo "Generando APP_KEY..."
-php artisan key:generate --force || echo "APP_KEY generation failed, continuing..."
+if php artisan key:generate --force; then
+    echo "APP_KEY generado exitosamente"
+else
+    echo "APP_KEY generation failed, trying to continue anyway..."
+fi
 
 # NO cachear configuraciones por ahora - permite que lea .env
 echo "Skipping config cache to allow .env reading..."
