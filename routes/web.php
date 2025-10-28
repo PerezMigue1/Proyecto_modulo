@@ -12,9 +12,53 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-// Ruta personalizada para registro
-Route::post('register', [RegisterController::class, 'store'])
-    ->name('register');
+// Ruta de login
+Route::get('login', function () {
+    return view('auth.login');
+})->middleware('guest')->name('login');
+
+// Ruta POST para procesar login
+Route::post('login', function (\Illuminate\Http\Request $request) {
+    $credentials = $request->only('email', 'password');
+    
+    if (\Illuminate\Support\Facades\Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        return redirect()->intended('dashboard');
+    }
+    
+    return back()->withErrors([
+        'email' => 'Las credenciales proporcionadas no son correctas.',
+    ]);
+})->middleware('guest');
+
+// Ruta de logout
+Route::post('logout', function (\Illuminate\Http\Request $request) {
+    \Illuminate\Support\Facades\Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect()->route('login');
+})->middleware('auth')->name('logout');
+
+// Rutas de registro
+Route::get('register', function () {
+    // Obtener las preguntas secretas desde MongoDB
+    try {
+        $client = new \MongoDB\Client(env('MONGODB_URI'));
+        $database = $client->selectDatabase('equipo');
+        $collection = $database->selectCollection('recuperar-password');
+        
+        $cursor = $collection->find();
+        $preguntas = [];
+        foreach ($cursor as $document) {
+            $preguntas[] = iterator_to_array($document);
+        }
+        
+        return view('auth.register', ['preguntas' => $preguntas]);
+    } catch (\Exception $e) {
+        return view('auth.register', ['preguntas' => []]);
+    }
+})->name('register');
+Route::post('register', [RegisterController::class, 'store']);
 
 Route::get('password/request', [PasswordRecoveryController::class, 'show'])
     ->name('password.request');
