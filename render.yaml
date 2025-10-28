@@ -3,8 +3,10 @@
 services:
   # Web Service - Laravel Application
   - type: web
-    name: laravel-app
+    name: ModuloUsuario
     runtime: php
+    plan: free  # Free tier
+    region: oregon  # or frankfurt, singapore, etc.
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       npm ci
@@ -24,7 +26,7 @@ services:
       - key: APP_URL
         fromService:
           type: web
-          name: laravel-app
+          name: ModuloUsuario
           property: host
       - key: LOG_CHANNEL
         value: stderr
@@ -48,7 +50,7 @@ services:
       - key: GOOGLE_REDIRECT_URI
         fromService:
           type: web
-          name: laravel-app
+          name: ModuloUsuario
           property: host
-        # Will be: http://your-app.onrender.com/auth/google/callback
+        # Will be: https://tu-app.onrender.com/auth/google/callback
     healthCheckPath: /
