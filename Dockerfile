@@ -36,8 +36,11 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm ci
 RUN npm run build
 
+# Hacer ejecutable el script de inicio (ya está en .)
+RUN chmod +x /var/www/html/start.sh
+
 # Exponer puerto
 EXPOSE 8000
 
-# Script de inicio que ejecuta los comandos de Laravel
-CMD php artisan key:generate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php -S 0.0.0.0:8000 -t public
+# Usar el script de inicio
+CMD ["/var/www/html/start.sh"]
