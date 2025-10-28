@@ -9,13 +9,9 @@ if [ ! -f .env ]; then
     cp .env.example .env 2>/dev/null || touch .env
 fi
 
-# Generar APP_KEY si no existe
-if ! grep -q "APP_KEY=" .env || grep -q "APP_KEY=$" .env; then
-    echo "Generando APP_KEY..."
-    php artisan key:generate --force
-else
-    echo "APP_KEY ya existe, omitiendo generacion"
-fi
+# Siempre generar APP_KEY
+echo "Generando APP_KEY..."
+php artisan key:generate --force
 
 # Cachear configuraciones
 echo "Cacheando configuraciones..."
