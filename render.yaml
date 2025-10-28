@@ -1,0 +1,54 @@
+# Render.com Configuration for Laravel + MongoDB
+
+services:
+  # Web Service - Laravel Application
+  - type: web
+    name: laravel-app
+    runtime: php
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      npm ci
+      npm run build
+      php artisan key:generate --force
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+    startCommand: php -S 0.0.0.0:$PORT -t public
+    envVars:
+      - key: APP_NAME
+        value: Laravel App
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        fromService:
+          type: web
+          name: laravel-app
+          property: host
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+      # Database (MongoDB)
+      - key: MONGODB_URI
+        sync: false  # Set this in Render dashboard
+      # Cache & Session
+      - key: CACHE_STORE
+        value: file
+      - key: SESSION_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
+        sync: false  # Set this in Render dashboard
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false  # Set this in Render dashboard
+      - key: GOOGLE_REDIRECT_URI
+        fromService:
+          type: web
+          name: laravel-app
+          property: host
+        # Will be: http://your-app.onrender.com/auth/google/callback
+    healthCheckPath: /
