@@ -1,7 +1,4 @@
-# Render.com Configuration for Laravel + MongoDB
-
 services:
-  # Web Service - Laravel Application
   - type: web
     name: ModuloUsuario
     buildCommand: |
@@ -29,25 +26,21 @@ services:
         value: stderr
       - key: LOG_LEVEL
         value: error
-      # Database (MongoDB)
       - key: MONGODB_URI
-        sync: false  # Set this in Render dashboard
-      # Cache & Session
+        sync: false
       - key: CACHE_STORE
         value: file
       - key: SESSION_DRIVER
         value: file
       - key: QUEUE_CONNECTION
         value: sync
-      # Google OAuth
       - key: GOOGLE_CLIENT_ID
-        sync: false  # Set this in Render dashboard
+        sync: false
       - key: GOOGLE_CLIENT_SECRET
-        sync: false  # Set this in Render dashboard
+        sync: false
       - key: GOOGLE_REDIRECT_URI
         fromService:
           type: web
           name: ModuloUsuario
           property: host
-        # Will be: https://tu-app.onrender.com/auth/google/callback
     healthCheckPath: /
