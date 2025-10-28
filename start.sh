@@ -11,13 +11,13 @@ fi
 
 # Siempre generar APP_KEY
 echo "Generando APP_KEY..."
-php artisan key:generate --force
+php artisan key:generate --force || echo "APP_KEY generation failed, continuing..."
 
 # Cachear configuraciones
 echo "Cacheando configuraciones..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan config:cache || echo "Config cache failed"
+php artisan route:cache || echo "Route cache failed"
+php artisan view:cache || echo "View cache failed"
 
 # Mostrar APP_KEY para debugging
 echo "=== APP_KEY generado ==="
