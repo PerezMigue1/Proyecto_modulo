@@ -36,16 +36,8 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm ci
 RUN npm run build
 
-# Generar key de Laravel
-RUN php artisan key:generate --force
-
-# Cachear
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
 # Exponer puerto
 EXPOSE 8000
 
-# Iniciar servidor
-CMD php -S 0.0.0.0:8000 -t public
+# Script de inicio que ejecuta los comandos de Laravel
+CMD php artisan key:generate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php -S 0.0.0.0:8000 -t public
