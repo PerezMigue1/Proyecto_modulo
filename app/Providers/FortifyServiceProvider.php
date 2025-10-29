@@ -76,7 +76,17 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::registerView(function () {
             // Obtener las preguntas secretas desde MongoDB
             try {
-                $client = new \MongoDB\Client(env('MONGODB_URI'));
+                $uri = env('MONGODB_URI');
+                // Deshabilitar TLS si está en la URI
+                if (strpos($uri, 'ssl=true') !== false) {
+                    $uri = str_replace('ssl=true', 'ssl=false', $uri);
+                }
+                if (strpos($uri, 'tls=true') !== false) {
+                    $uri = str_replace('tls=true', 'tls=false', $uri);
+                }
+                $uri .= (strpos($uri, '?') === false ? '?' : '&') . 'ssl=false';
+                
+                $client = new \MongoDB\Client($uri);
                 $database = $client->selectDatabase('equipo');
                 $collection = $database->selectCollection('recuperar-password');
                 
