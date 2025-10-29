@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login - {{ config('app.name', 'Laravel') }}</title>
-    <link rel="stylesheet" href="{{ url('/css/auth.css') }}?v=2.8">
+    <link rel="stylesheet" href="/css/auth.css?v=2.8">
 </head>
 <body>
     <div class="login-container">
