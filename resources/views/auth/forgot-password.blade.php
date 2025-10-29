@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Recuperar contraseña - {{ config('app.name', 'Laravel') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/auth.css') }}?v=2.0">
+    <link rel="stylesheet" href="/css/auth.css?v=2.0">
 </head>
 <body>
     <div class="login-container">
