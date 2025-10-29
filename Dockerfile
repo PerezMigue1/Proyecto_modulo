@@ -38,11 +38,11 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm ci
 RUN npm run build
 
-# Hacer ejecutable el script de inicio (ya está en .)
-RUN chmod +x /var/www/html/start.sh
-
 # Exponer puerto
 EXPOSE 8000
+
+# Hacer ejecutable el script de inicio (ya está en .)
+RUN chmod +x /var/www/html/start.sh
 
 # Usar el script de inicio
 CMD ["/var/www/html/start.sh"]
