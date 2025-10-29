@@ -49,30 +49,6 @@ class FortifyServiceProvider extends ServiceProvider
                 return $user;
             }
         });
-        
-        // Redirigir al login después del registro (no hacer login automático)
-        Fortify::registerView(function () {
-            // Obtener las preguntas secretas desde MongoDB
-            try {
-                $client = new \MongoDB\Client(env('MONGODB_URI'));
-                $database = $client->selectDatabase('equipo');
-                $collection = $database->selectCollection('recuperar-password');
-                
-                $cursor = $collection->find();
-                $preguntas = [];
-                foreach ($cursor as $document) {
-                    $preguntas[] = iterator_to_array($document);
-                }
-                
-                return view('auth.register', [
-                    'preguntas' => $preguntas
-                ]);
-            } catch (\Exception $e) {
-                return view('auth.register', [
-                    'preguntas' => []
-                ]);
-            }
-        });
     }
 
     /**
@@ -120,9 +96,8 @@ class FortifyServiceProvider extends ServiceProvider
             }
         });
         
-        // Desactivar el registro automático de Fortify
-        Fortify::ignoreRoutes();
-
+        // NO desactivar todas las rutas de Fortify - necesitamos el login
+        
         Fortify::twoFactorChallengeView(fn () => view('auth.two-factor'));
         
         Fortify::confirmPasswordView(fn () => view('auth.confirm-password'));
