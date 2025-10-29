@@ -83,9 +83,19 @@
             </div>
 
             <div class="content-box">
-                <h3>🎉 Dashboard</h3>
-                <p>Has iniciado sesión exitosamente. Esta es tu página de Dashboard.</p>
-                <p>Aquí puedes agregar el contenido de tu aplicación según tus necesidades.</p>
+                <h3>📋 Información del Proyecto</h3>
+                <p><strong>NOMBRE DE LA ACTIVIDAD:</strong></p>
+                <p>Definición de la práctica de clase – Módulo de usuario con métodos de autenticación y cifrado.</p>
+                
+                <p style="margin-top: 20px;"><strong>INTEGRANTES DEL EQUIPO:</strong></p>
+                <ul style="color: #718096; line-height: 1.8; margin-left: 20px;">
+                    <li>Ontiveros Sanjuan Diana Monserrat - 20230019</li>
+                    <li>Flores cervantes Elizabeth - 20230015</li>
+                    <li>Martínez Ramírez Karla Yoselin – 20221078</li>
+                    <li>Hernández Valdes Francisco - 20230079</li>
+                    <li>Pérez de la Cruz Miguel Ángel - 20230091</li>
+                    <li>Ontiveros García Axali Jerusalén - 20230039</li>
+                </ul>
             </div>
         </div>
     </div>
