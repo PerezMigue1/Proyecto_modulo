@@ -17,19 +17,8 @@ Route::get('login', function () {
     return view('auth.login');
 })->middleware('guest')->name('login');
 
-// Ruta POST para procesar login
-Route::post('login', function (\Illuminate\Http\Request $request) {
-    $credentials = $request->only('email', 'password');
-    
-    if (\Illuminate\Support\Facades\Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        return redirect()->intended('dashboard');
-    }
-    
-    return back()->withErrors([
-        'email' => 'Las credenciales proporcionadas no son correctas.',
-    ]);
-})->middleware('guest');
+// La ruta POST de login la maneja Fortify automáticamente
+// No necesitamos definirla manualmente
 
 // Ruta de logout
 Route::post('logout', function (\Illuminate\Http\Request $request) {
