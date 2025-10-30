@@ -83,11 +83,13 @@
                 </a>
 
                 <a href="{{ route('facebook.login') }}" class="btn-facebook">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 12C22 6.477 17.523 2 12 2S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987H7.898v-2.89h2.54V9.845c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.89h-2.33V21.88C18.343 21.128 22 16.99 22 12z" fill="#1877F2"/>
-                        <path d="M15.227 16.89l.443-2.89h-2.773v-1.875c0-.791.387-1.562 1.63-1.562h1.26v-2.46s-1.144-.195-2.238-.195c-2.285 0-3.777 1.384-3.777 3.89v2.156H7.898v2.89h2.54v6.987a10.027 10.027 0 003.016 0V16.89h1.773z" fill="#fff"/>
-                    </svg>
-                    Continuar con Facebook
+                    <span class="btn-provider-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="12" fill="#1877F2"/>
+                            <path d="M15.504 12H13.458v6H10.68v-6H9.5v-2.244h1.18v-1.442c0-1.392.648-2.214 2.224-2.214h1.6v2.071h-1.023c-.38 0-.454.156-.454.447v1.138h1.497L15.504 12z" fill="#fff"/>
+                        </svg>
+                    </span>
+                    <span class="btn-provider-text">Continuar con Facebook</span>
                 </a>
 
                 <div class="links">
