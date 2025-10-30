@@ -36,6 +36,9 @@ class EmailVerificationController extends Controller
             event(new Verified($user));
         }
 
+        // Limpiar la sesión de verificación pendiente
+        $request->session()->forget('registered_email');
+
         // Redirigir al login después de verificar (sin autenticar)
         return redirect()->route('login')->with('status', '¡Correo verificado exitosamente! Ya puedes iniciar sesión.');
     }
