@@ -301,34 +301,41 @@ a.btn-google:hover {
     text-decoration: none !important;
 }
 
-/* Facebook button */
+/* Facebook button oficial igual que Google */
 .btn-facebook,
 a.btn-facebook {
     display: block !important;
     width: 100%;
     padding: 14px 24px !important;
-    background: #1877F2 !important; /* Azul Facebook */
+    background: #1877F2 !important;
     color: white !important;
     border: none !important;
     border-radius: 10px;
     font-size: 16px !important;
     font-weight: 600 !important;
-    cursor: pointer;
-    text-decoration: none !important;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(24,119,242,0.18) !important;
     text-align: center !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: all 0.3s;
+    line-height: 1.5;
+    margin-top: 8px;
 }
-
+.btn-facebook svg {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 12px;
+    filter: none;
+    transition: transform 0.3s ease;
+}
 .btn-facebook:hover,
 a.btn-facebook:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(24, 119, 242, 0.4) !important;
     background: #166FE5 !important;
+    color: white !important;
 }
-
 .btn-facebook:active,
 a.btn-facebook:active {
     transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(24, 119, 242, 0.3) !important;
+    box-shadow: 0 2px 10px rgba(24, 119, 242, 0.2) !important;
 }
