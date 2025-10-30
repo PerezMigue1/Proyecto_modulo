@@ -74,4 +74,10 @@ Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallba
 Route::get('auth/facebook', [FacebookController::class, 'redirect'])->name('facebook.login');
 Route::get('auth/facebook/callback', [FacebookController::class, 'callback'])->name('facebook.callback');
 
+// Página de Políticas de Privacidad
+Route::get('privacy', fn() => view('privacy'))->name('privacy');
+
+// Página de Eliminación de Datos
+Route::get('delete-data', fn() => view('delete-data'))->name('delete-data');
+
 require __DIR__.'/settings.php';
