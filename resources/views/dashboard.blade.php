@@ -96,6 +96,29 @@
                     <li>Pérez de la Cruz Miguel Ángel - 20230091</li>
                     <li>Ontiveros García Axali Jerusalén - 20230039</li>
                 </ul>
+
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                    <h3 style="margin-bottom: 15px;">🔐 Métodos de Cifrado Implementados</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <p style="font-weight: 600; color: #1a202c; margin-bottom: 8px;">• Cifrado AES (Advanced Encryption Standard):</p>
+                        <p style="color: #718096; line-height: 1.6;">
+                            Es un algoritmo de cifrado simétrico que utiliza la misma clave para cifrar y descifrar los datos. 
+                            Se caracteriza por eficiencia y seguridad, siendo adoptado para proteger información confidencial en sistemas modernos. 
+                            AES garantiza que los datos almacenados o transmitidos no puedan ser leídos por terceros no autorizados.
+                        </p>
+                    </div>
+
+                    <div>
+                        <p style="font-weight: 600; color: #1a202c; margin-bottom: 8px;">• Cifrado RSA (Rivest–Shamir–Adleman):</p>
+                        <p style="color: #718096; line-height: 1.6;">
+                            Es un algoritmo de cifrado asimétrico que emplea un par de claves: una pública y una privada. 
+                            La clave pública se usa para cifrar la información y la privada para descifrarla. Este mecanismo permite intercambiar 
+                            datos de forma segura incluso en entornos no confiables, además de ser utilizado en firmas digitales para verificar 
+                            la autenticidad e integridad de los mensajes.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

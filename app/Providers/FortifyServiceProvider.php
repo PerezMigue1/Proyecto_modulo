@@ -117,10 +117,5 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($throttleKey);
         });
-
-        // Rate limiting para registro - máximo 3 registros por hora por IP
-        RateLimiter::for('register', function (Request $request) {
-            return Limit::perHour(3)->by($request->ip());
-        });
     }
 }
