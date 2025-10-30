@@ -20,12 +20,8 @@ class RegisterController extends Controller
         // Disparar el evento Registered que enviará el correo de verificación
         event(new Registered($user));
 
-        // Hacer login del usuario para que pueda ver la página de verificación
-        Auth::login($user);
-
-        // Redirigir a la página de verificación de correo
-        // Laravel/Fortify automáticamente redirigirá aquí si el correo no está verificado
-        return redirect()->route('verification.notice')->with('status', '¡Registro exitoso! Se ha enviado un enlace de verificación a tu correo electrónico.');
+        // NO hacer login automático - redirigir al login con mensaje
+        return redirect()->route('login')->with('status', '¡Registro exitoso! Se ha enviado un enlace de verificación a tu correo electrónico. Por favor, verifica tu correo antes de iniciar sesión.');
     }
 }
 

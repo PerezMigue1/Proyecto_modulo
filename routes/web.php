@@ -3,6 +3,7 @@
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -68,5 +69,10 @@ Route::get('dashboard', function () {
 // Rutas para autenticación con Google
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+// Sobrescribir la ruta de verificación de correo para redirigir al login después de verificar
+Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, '__invoke'])
+    ->middleware(['signed'])
+    ->name('verification.verify');
 
 require __DIR__.'/settings.php';
