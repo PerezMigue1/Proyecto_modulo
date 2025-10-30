@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Verificar email - {{ config('app.name', 'Laravel') }}</title>
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/auth.css?v=2.0">
 </head>
 <body>
     <div class="login-container">
@@ -21,15 +21,19 @@
             @endif
 
             <div class="links">
-                <p>Se ha enviado un enlace de verificación a tu correo electrónico.</p>
-                <form method="POST" action="{{ route('verification.send') }}">
+                <p>Antes de continuar, por favor verifica tu correo electrónico mediante el enlace que te hemos enviado.</p>
+                <p>Si no recibiste el correo, puedes solicitarlo nuevamente haciendo clic en el botón de abajo.</p>
+                
+                <form method="POST" action="{{ route('verification.send') }}" style="margin-top: 20px;">
                     @csrf
                     <button type="submit" class="btn-primary">
                         Reenviar enlace de verificación
                     </button>
                 </form>
                 
-                <a href="{{ route('logout') }}" class="link">Cerrar sesión</a>
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="{{ route('logout') }}" class="link">Cerrar sesión</a>
+                </div>
             </div>
         </div>
     </div>
