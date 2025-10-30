@@ -1,5 +1,7 @@
 # Configuración de Correo en Render
 
+> 📖 **Para una guía paso a paso más detallada, ve a [GUIA_SMTP_GRATIS.md](GUIA_SMTP_GRATIS.md)**
+
 ## Variables de Entorno Necesarias en Render
 
 Para que el sistema de verificación de correo funcione en Render, necesitas configurar las siguientes variables de entorno en el panel de Render:
