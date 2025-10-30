@@ -3,6 +3,7 @@
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\FacebookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -68,5 +69,9 @@ Route::get('dashboard', function () {
 // Rutas para autenticación con Google
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+// Rutas para autenticación con Facebook
+Route::get('auth/facebook', [FacebookController::class, 'redirect'])->name('facebook.login');
+Route::get('auth/facebook/callback', [FacebookController::class, 'callback'])->name('facebook.callback');
 
 require __DIR__.'/settings.php';

@@ -76,6 +76,7 @@ class User extends Authenticatable
         'respuesta_secreta',
         'telefono',
         'google_id',
+        'facebook_id',
     ];
 
     /**
