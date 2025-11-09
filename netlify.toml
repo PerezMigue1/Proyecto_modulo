@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm install && npm run build"
   publish = "dist"
 
 [[redirects]]
@@ -9,4 +9,8 @@
 
 [build.environment]
   NODE_VERSION = "18"
+
+# Variables de entorno (configurar en Netlify Dashboard)
+# VITE_API_URL=https://tu-backend.onrender.com/api
+# VITE_FRONTEND_URL=https://tu-frontend.netlify.app
 

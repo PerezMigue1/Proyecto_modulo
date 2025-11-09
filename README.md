@@ -116,6 +116,27 @@ El frontend consume estas APIs del backend:
 
 ## 🚀 Despliegue
 
+### Netlify (Recomendado)
+
+Este proyecto está configurado para desplegarse en Netlify.
+
+1. **Sube el proyecto a GitHub**
+2. **Conecta con Netlify**:
+   - Ve a [Netlify](https://netlify.com)
+   - Click en "Add new site" → "Import an existing project"
+   - Selecciona tu repositorio
+3. **Configura**:
+   - **Build command**: `npm install && npm run build`
+   - **Publish directory**: `dist`
+4. **Variables de entorno**:
+   ```
+   VITE_API_URL=https://tu-backend.onrender.com/api
+   VITE_FRONTEND_URL=https://tu-frontend.netlify.app
+   ```
+5. **Despliega**
+
+Ver `DESPLIEGUE_NETLIFY_RENDER.md` para instrucciones detalladas.
+
 ### Build para Producción
 
 ```bash
@@ -124,28 +145,28 @@ npm run build
 
 Los archivos se generarán en `dist/`
 
-### Variables de Entorno en Producción
-
-```env
-VITE_API_URL=https://tu-backend.onrender.com/api
-VITE_FRONTEND_URL=https://tu-frontend.onrender.com
-```
-
 ## 📝 Notas Importantes
 
 1. **Backend separado**: El backend está en otro proyecto. Asegúrate de que esté corriendo.
-2. **URL del Backend**: Configura `VITE_API_URL` correctamente en `.env`
+2. **URL del Backend**: Configura `VITE_API_URL` correctamente en `.env` (desarrollo) o en Netlify (producción)
 3. **CORS**: El backend debe tener CORS configurado para permitir requests del frontend
 4. **OAuth**: Las URLs de OAuth se construyen automáticamente desde `VITE_API_URL`
 
 ## 📚 Documentación
 
+- `DESPLIEGUE_NETLIFY_RENDER.md` - Guía de despliegue (Netlify + Render)
+- `DESPLIEGUE.md` - Guía completa de despliegue
+- `DESPLIEGUE_RAPIDO.md` - Guía rápida
 - `ARQUITECTURA.md` - Arquitectura completa del proyecto
+- `COMO_INICIAR.md` - Cómo iniciar el proyecto
+- `INICIO_RAPIDO.md` - Inicio rápido
 
 ## 🎯 Resumen
 
 - **Proyecto**: Solo frontend (Vue.js)
 - **Backend**: En otro proyecto separado
+- **Despliegue Frontend**: Netlify
+- **Despliegue Backend**: Render
 - **Comunicación**: APIs REST
 - **Autenticación**: Tokens (Sanctum)
 
