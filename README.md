@@ -130,7 +130,7 @@ Este proyecto está configurado para desplegarse en Netlify.
    - **Publish directory**: `dist`
 4. **Variables de entorno**:
    ```
-   VITE_API_URL=https://tu-backend.onrender.com/api
+   VITE_API_URL=https://backend-equipo.onrender.com/api
    VITE_FRONTEND_URL=https://tu-frontend.netlify.app
    ```
 5. **Despliega**

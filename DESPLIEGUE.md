@@ -41,7 +41,7 @@ APP_NAME="Módulo Usuario API"
 APP_ENV=production
 APP_DEBUG=false
 APP_KEY=base64:... (genera uno con: php artisan key:generate)
-APP_URL=https://tu-backend.onrender.com
+APP_URL=https://backend-equipo.onrender.com
 
 DB_CONNECTION=mongodb
 MONGODB_URI=tu_uri_de_mongodb_atlas
@@ -64,7 +64,7 @@ CORS_ALLOWED_ORIGINS=https://tu-frontend.onrender.com,http://localhost:3000
 - Click en **"Create Web Service"**
 - Render construirá y desplegará automáticamente
 - Espera a que el despliegue termine
-- Tu backend estará en: `https://tu-backend.onrender.com`
+- Tu backend estará en: `https://backend-equipo.onrender.com`
 
 ---
 
@@ -111,7 +111,7 @@ services:
 #### 3. Configurar Variables de Entorno
 
 ```env
-VITE_API_URL=https://tu-backend.onrender.com/api
+VITE_API_URL=https://backend-equipo.onrender.com/api
 VITE_FRONTEND_URL=https://tu-frontend.onrender.com
 ```
 
@@ -149,7 +149,7 @@ En el dashboard de Vercel:
 2. Settings → Environment Variables
 3. Agrega:
    ```
-   VITE_API_URL=https://tu-backend.onrender.com/api
+   VITE_API_URL=https://backend-equipo.onrender.com/api
    VITE_FRONTEND_URL=https://tu-frontend.vercel.app
    ```
 
@@ -188,7 +188,7 @@ En Netlify Dashboard:
 - Site settings → Environment variables
 - Agrega:
   ```
-  VITE_API_URL=https://tu-backend.onrender.com/api
+  VITE_API_URL=https://backend-equipo.onrender.com/api
   VITE_FRONTEND_URL=https://tu-frontend.netlify.app
   ```
 
@@ -211,7 +211,7 @@ FACEBOOK_REDIRECT_URI=https://tu-backend.onrender.com/auth/facebook/callback
 
 En el frontend, las variables de entorno ya están configuradas:
 ```env
-VITE_API_URL=https://tu-backend.onrender.com/api
+VITE_API_URL=https://backend-equipo.onrender.com/api
 VITE_FRONTEND_URL=https://tu-frontend.onrender.com
 ```
 
@@ -255,7 +255,7 @@ VITE_FRONTEND_URL=https://tu-frontend.onrender.com
 
 ### Backend
 
-1. ✅ Accede a: `https://tu-backend.onrender.com/api/preguntas-secretas`
+1. ✅ Accede a: `https://backend-equipo.onrender.com/api/preguntas-secretas`
 2. ✅ Deberías ver JSON con las preguntas secretas
 3. ✅ Verifica los logs en Render para errores
 
@@ -309,7 +309,7 @@ En el backend, verifica `config/cors.php`:
 
 ### Backend
 - **Plataforma**: Render.com
-- **URL**: `https://tu-backend.onrender.com`
+- **URL**: `https://backend-equipo.onrender.com`
 - **Tipo**: Web Service (Docker)
 
 ### Frontend

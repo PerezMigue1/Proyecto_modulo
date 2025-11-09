@@ -48,7 +48,7 @@ APP_NAME="Módulo Usuario API"
 APP_ENV=production
 APP_DEBUG=false
 APP_KEY=base64:... (genera uno con: php artisan key:generate)
-APP_URL=https://modulo-usuario-backend.onrender.com
+APP_URL=https://backend-equipo.onrender.com
 
 DB_CONNECTION=mongodb
 MONGODB_URI=tu_uri_de_mongodb_atlas
@@ -56,18 +56,17 @@ MONGODB_DATABASE=equipo
 
 GOOGLE_CLIENT_ID=tu_client_id
 GOOGLE_CLIENT_SECRET=tu_client_secret
-GOOGLE_REDIRECT_URI=https://modulo-usuario-backend.onrender.com/auth/google/callback
+GOOGLE_REDIRECT_URI=https://backend-equipo.onrender.com/auth/google/callback
 
 FACEBOOK_CLIENT_ID=tu_client_id
 FACEBOOK_CLIENT_SECRET=tu_client_secret
-FACEBOOK_REDIRECT_URI=https://modulo-usuario-backend.onrender.com/auth/facebook/callback
+FACEBOOK_REDIRECT_URI=https://backend-equipo.onrender.com/auth/facebook/callback
 
 FRONTEND_URL=https://tu-frontend.netlify.app
 CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app,http://localhost:3000
 ```
 
 **Importante**: 
-- Reemplaza `modulo-usuario-backend` con el nombre que le diste a tu servicio
 - Reemplaza `tu-frontend.netlify.app` con la URL de tu frontend en Netlify (la obtendrás después)
 
 ### 5. Desplegar Backend
@@ -75,12 +74,12 @@ CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app,http://localhost:3000
 - Click en **"Create Web Service"**
 - Render construirá y desplegará automáticamente
 - Espera a que el despliegue termine (puede tardar 5-10 minutos)
-- Tu backend estará en: `https://modulo-usuario-backend.onrender.com`
+- Tu backend estará en: `https://backend-equipo.onrender.com`
 - **Copia esta URL**, la necesitarás para el frontend
 
 ### 6. Verificar Backend
 
-1. Accede a: `https://modulo-usuario-backend.onrender.com/api/preguntas-secretas`
+1. Accede a: `https://backend-equipo.onrender.com/api/preguntas-secretas`
 2. Deberías ver JSON con las preguntas secretas
 3. Si hay errores, revisa los logs en Render
 
@@ -141,12 +140,11 @@ netlify deploy --prod
 3. Agrega estas variables:
 
 ```env
-VITE_API_URL=https://modulo-usuario-backend.onrender.com/api
+VITE_API_URL=https://backend-equipo.onrender.com/api
 VITE_FRONTEND_URL=https://tu-frontend.netlify.app
 ```
 
 **Importante**: 
-- Reemplaza `modulo-usuario-backend` con el nombre de tu backend en Render
 - La URL `tu-frontend.netlify.app` la obtendrás después del primer despliegue
 
 ### 5. Desplegar Frontend
@@ -195,7 +193,7 @@ CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app,http://localhost:3000
 4. Edita tu OAuth 2.0 Client
 5. Agrega a **Authorized redirect URIs**:
    ```
-   https://modulo-usuario-backend.onrender.com/auth/google/callback
+   https://backend-equipo.onrender.com/auth/google/callback
    ```
 6. Click en **Save**
 
@@ -206,13 +204,13 @@ CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app,http://localhost:3000
 3. Ve a **Settings** → **Basic**
 4. Agrega a **App Domains**:
    ```
-   modulo-usuario-backend.onrender.com
+   backend-equipo.onrender.com
    tu-frontend.netlify.app
    ```
 5. Ve a **Facebook Login** → **Settings**
 6. Agrega a **Valid OAuth Redirect URIs**:
    ```
-   https://modulo-usuario-backend.onrender.com/auth/facebook/callback
+   https://backend-equipo.onrender.com/auth/facebook/callback
    ```
 7. Click en **Save Changes**
 
@@ -222,7 +220,7 @@ CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app,http://localhost:3000
 
 ### Backend
 
-1. ✅ Accede a: `https://modulo-usuario-backend.onrender.com/api/preguntas-secretas`
+1. ✅ Accede a: `https://backend-equipo.onrender.com/api/preguntas-secretas`
 2. ✅ Deberías ver JSON con las preguntas secretas
 3. ✅ Verifica los logs en Render para errores
 
@@ -286,7 +284,7 @@ CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app,http://localhost:3000
 ## 📝 Resumen
 
 ### Backend (Render)
-- **URL**: `https://modulo-usuario-backend.onrender.com`
+- **URL**: `https://backend-equipo.onrender.com`
 - **Tipo**: Web Service (Docker)
 - **Variables importantes**: 
   - `FRONTEND_URL`

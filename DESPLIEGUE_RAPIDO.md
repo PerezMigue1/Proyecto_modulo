@@ -30,16 +30,16 @@ FRONTEND_URL=https://tu-frontend.onrender.com
 CORS_ALLOWED_ORIGINS=https://tu-frontend.onrender.com
 GOOGLE_CLIENT_ID=tu_id
 GOOGLE_CLIENT_SECRET=tu_secret
-GOOGLE_REDIRECT_URI=https://tu-backend.onrender.com/auth/google/callback
+GOOGLE_REDIRECT_URI=https://backend-equipo.onrender.com/auth/google/callback
 FACEBOOK_CLIENT_ID=tu_id
 FACEBOOK_CLIENT_SECRET=tu_secret
-FACEBOOK_REDIRECT_URI=https://tu-backend.onrender.com/auth/facebook/callback
+FACEBOOK_REDIRECT_URI=https://backend-equipo.onrender.com/auth/facebook/callback
 ```
 
 ### 4. Desplegar
 - Click **Create Web Service**
 - Espera a que termine
-- URL: `https://tu-backend.onrender.com`
+- URL: `https://backend-equipo.onrender.com`
 
 ---
 
@@ -59,7 +59,7 @@ vercel
 ### 3. Configurar Variables
 En Vercel Dashboard:
 ```
-VITE_API_URL=https://tu-backend.onrender.com/api
+VITE_API_URL=https://backend-equipo.onrender.com/api
 VITE_FRONTEND_URL=https://tu-frontend.vercel.app
 ```
 
@@ -82,7 +82,7 @@ services:
     startCommand: npx serve -s dist -l $PORT
     envVars:
       - key: VITE_API_URL
-        value: https://tu-backend.onrender.com/api
+        value: https://backend-equipo.onrender.com/api
       - key: VITE_FRONTEND_URL
         value: https://tu-frontend.onrender.com
 ```
@@ -100,20 +100,20 @@ services:
 ### Google
 1. Google Cloud Console
 2. **APIs & Services** → **Credentials**
-3. Agrega redirect URI: `https://tu-backend.onrender.com/auth/google/callback`
+3. Agrega redirect URI: `https://backend-equipo.onrender.com/auth/google/callback`
 
 ### Facebook
 1. Facebook Developers
 2. **Settings** → **Basic**
-3. Agrega dominio: `tu-backend.onrender.com`
+3. Agrega dominio: `backend-equipo.onrender.com`
 4. **Facebook Login** → **Settings**
-5. Agrega redirect URI: `https://tu-backend.onrender.com/auth/facebook/callback`
+5. Agrega redirect URI: `https://backend-equipo.onrender.com/auth/facebook/callback`
 
 ---
 
 ## ✅ Verificar
 
-1. **Backend**: `https://tu-backend.onrender.com/api/preguntas-secretas`
+1. **Backend**: `https://backend-equipo.onrender.com/api/preguntas-secretas`
 2. **Frontend**: `https://tu-frontend.onrender.com`
 3. **Login**: Prueba login y OAuth
 
