@@ -115,8 +115,15 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('❌ Register error details:', {
         message: err.message,
         status: err.response?.status,
-        data: err.response?.data
+        data: err.response?.data,
+        errors: err.response?.data?.errors
       })
+      
+      // Log detallado de errores de validación
+      if (err.response?.status === 422 && err.response?.data?.errors) {
+        console.error('❌ Errores de validación:', JSON.stringify(err.response.data.errors, null, 2))
+      }
+      
       error.value = err
       throw err
     } finally {

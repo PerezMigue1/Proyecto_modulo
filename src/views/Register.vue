@@ -7,8 +7,15 @@
       </div>
 
       <div v-if="error" class="alert alert-error">
-        <ul v-if="typeof error === 'object'">
-          <li v-for="(err, key) in error" :key="key">{{ err[0] }}</li>
+        <ul v-if="typeof error === 'object' && !Array.isArray(error)">
+          <li v-for="(err, key) in error" :key="key">
+            <strong>{{ key }}:</strong> 
+            <span v-if="Array.isArray(err)">{{ err.join(', ') }}</span>
+            <span v-else>{{ err }}</span>
+          </li>
+        </ul>
+        <ul v-else-if="Array.isArray(error)">
+          <li v-for="(err, index) in error" :key="index">{{ err }}</li>
         </ul>
         <span v-else>{{ error }}</span>
       </div>
@@ -184,10 +191,33 @@ async function handleRegister() {
       // Error de respuesta del servidor
       const errorData = err.response.data
       console.error('❌ Error del servidor:', errorData)
+      console.error('❌ Errores detallados:', JSON.stringify(errorData, null, 2))
       
       if (errorData?.errors) {
-        // Errores de validación
-        error.value = errorData.errors
+        // Errores de validación - construir mensaje legible
+        const errors = errorData.errors
+        const errorMessages = []
+        
+        // Recorrer todos los errores y construir mensajes
+        for (const [field, messages] of Object.entries(errors)) {
+          if (Array.isArray(messages)) {
+            messages.forEach(msg => {
+              errorMessages.push(`${field}: ${msg}`)
+            })
+          } else {
+            errorMessages.push(`${field}: ${messages}`)
+          }
+        }
+        
+        // Si hay mensajes, mostrarlos
+        if (errorMessages.length > 0) {
+          error.value = errorMessages.join('. ')
+        } else {
+          error.value = 'Error de validación. Por favor, verifica los datos ingresados.'
+        }
+        
+        // También guardar el objeto completo para mostrar en la UI
+        error.value = errors
       } else if (errorData?.message) {
         error.value = errorData.message
       } else {

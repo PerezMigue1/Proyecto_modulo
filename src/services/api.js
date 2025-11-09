@@ -46,8 +46,8 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    // Log para debugging (solo en desarrollo)
-    if (import.meta.env.DEV) {
+    // Log para debugging (siempre en desarrollo, también en producción para errores)
+    if (import.meta.env.DEV || response.status >= 400) {
       console.log('📥 Response:', response.status, response.config.url, response.data)
     }
     return response
@@ -62,6 +62,17 @@ api.interceptors.response.use(
       data: error.response?.data,
       networkError: !error.response
     })
+    
+    // Log detallado de errores 422 (validación)
+    if (error.response?.status === 422 && error.response?.data) {
+      console.error('❌ Errores de validación (422):', JSON.stringify(error.response.data, null, 2))
+      if (error.response.data.errors) {
+        console.error('❌ Campos con error:', Object.keys(error.response.data.errors))
+        Object.entries(error.response.data.errors).forEach(([field, messages]) => {
+          console.error(`  - ${field}:`, messages)
+        })
+      }
+    }
 
     if (error.response?.status === 401) {
       // Limpiar token y redirigir al login
