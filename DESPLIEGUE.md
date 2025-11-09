@@ -49,11 +49,11 @@ MONGODB_DATABASE=equipo
 
 GOOGLE_CLIENT_ID=tu_client_id
 GOOGLE_CLIENT_SECRET=tu_client_secret
-GOOGLE_REDIRECT_URI=https://tu-backend.onrender.com/auth/google/callback
+GOOGLE_REDIRECT_URI=https://backend-equipo.onrender.com/auth/google/callback
 
 FACEBOOK_CLIENT_ID=tu_client_id
 FACEBOOK_CLIENT_SECRET=tu_client_secret
-FACEBOOK_REDIRECT_URI=https://tu-backend.onrender.com/auth/facebook/callback
+FACEBOOK_REDIRECT_URI=https://backend-equipo.onrender.com/auth/facebook/callback
 
 FRONTEND_URL=https://tu-frontend.onrender.com
 CORS_ALLOWED_ORIGINS=https://tu-frontend.onrender.com,http://localhost:3000
@@ -203,8 +203,8 @@ En el backend (Render), actualiza las variables de entorno:
 ```env
 FRONTEND_URL=https://tu-frontend.onrender.com
 CORS_ALLOWED_ORIGINS=https://tu-frontend.onrender.com
-GOOGLE_REDIRECT_URI=https://tu-backend.onrender.com/auth/google/callback
-FACEBOOK_REDIRECT_URI=https://tu-backend.onrender.com/auth/facebook/callback
+GOOGLE_REDIRECT_URI=https://backend-equipo.onrender.com/auth/google/callback
+FACEBOOK_REDIRECT_URI=https://backend-equipo.onrender.com/auth/facebook/callback
 ```
 
 ### 2. Actualizar URLs en Frontend
@@ -223,7 +223,7 @@ VITE_FRONTEND_URL=https://tu-frontend.onrender.com
 4. Edita tu OAuth 2.0 Client
 5. Agrega a **Authorized redirect URIs**:
    ```
-   https://tu-backend.onrender.com/auth/google/callback
+   https://backend-equipo.onrender.com/auth/google/callback
    ```
 
 ### 4. Actualizar OAuth (Facebook)
@@ -233,13 +233,13 @@ VITE_FRONTEND_URL=https://tu-frontend.onrender.com
 3. Ve a **Settings** → **Basic**
 4. Agrega a **App Domains**:
    ```
-   tu-backend.onrender.com
+   backend-equipo.onrender.com
    tu-frontend.onrender.com
    ```
 5. Ve a **Facebook Login** → **Settings**
 6. Agrega a **Valid OAuth Redirect URIs**:
    ```
-   https://tu-backend.onrender.com/auth/facebook/callback
+   https://backend-equipo.onrender.com/auth/facebook/callback
    ```
 
 ### 5. Actualizar MongoDB Atlas
