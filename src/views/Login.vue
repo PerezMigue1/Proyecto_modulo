@@ -171,11 +171,15 @@ async function handleLogin() {
       }
     } else if (err.request) {
       // Error de red (sin respuesta del servidor)
-      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet y que el backend esté funcionando.'
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-equipo.onrender.com/api'
+      error.value = `No se pudo conectar con el servidor. Verifica que el backend esté funcionando en ${apiUrl}`
       console.error('❌ Network error:', err.request)
+      console.error('❌ Error code:', err.code)
+      console.error('❌ Error message:', err.message)
     } else {
       // Otro tipo de error
       error.value = err.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.'
+      console.error('❌ Otro tipo de error:', err)
     }
   } finally {
     loading.value = false

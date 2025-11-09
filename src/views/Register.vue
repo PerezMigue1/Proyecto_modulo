@@ -130,14 +130,25 @@ onMounted(async () => {
   // Log de información de debug
   console.log('🔍 Register Component Mounted')
   console.log('🔗 API URL:', import.meta.env.VITE_API_URL)
+  console.log('🔗 Environment:', import.meta.env.MODE)
   
   try {
     console.log('📋 Cargando preguntas secretas...')
-    preguntas.value = await getSecretQuestions()
-    console.log('✅ Preguntas secretas cargadas:', preguntas.value.length)
+    const preguntasData = await getSecretQuestions()
+    console.log('✅ Preguntas secretas recibidas:', preguntasData)
+    
+    if (Array.isArray(preguntasData) && preguntasData.length > 0) {
+      preguntas.value = preguntasData
+      console.log('✅ Preguntas secretas cargadas:', preguntas.value.length)
+    } else {
+      console.warn('⚠️ No se recibieron preguntas secretas o el array está vacío')
+      preguntas.value = []
+    }
   } catch (err) {
     console.error('❌ Error loading secret questions:', err)
-    // No mostrar error fatal, solo log
+    console.error('❌ Error completo:', JSON.stringify(err, null, 2))
+    preguntas.value = []
+    // No mostrar error fatal en UI, solo log para no bloquear el registro
   }
 })
 
@@ -225,13 +236,18 @@ async function handleRegister() {
       }
     } else if (err.request) {
       // Error de red (sin respuesta del servidor)
-      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet y que el backend esté funcionando en https://backend-equipo.onrender.com'
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-equipo.onrender.com/api'
+      error.value = `No se pudo conectar con el servidor. Verifica que el backend esté funcionando en ${apiUrl}. Error: ${err.message || 'Sin conexión'}`
       console.error('❌ Network error:', err.request)
+      console.error('❌ Error code:', err.code)
+      console.error('❌ Error message:', err.message)
       console.error('❌ URL intentada:', err.config?.url)
       console.error('❌ Base URL:', err.config?.baseURL)
+      console.error('❌ Full URL:', err.config?.baseURL + err.config?.url)
     } else {
       // Otro tipo de error
       error.value = err.message || 'Error al registrarse. Por favor, intenta de nuevo.'
+      console.error('❌ Otro tipo de error:', err)
     }
   } finally {
     loading.value = false
