@@ -132,9 +132,13 @@ async function handleRegister() {
   loading.value = true
 
   try {
-    await authStore.register(form.value)
-    router.push('/dashboard')
+    const response = await authStore.register(form.value)
+    
+    // Registro exitoso, redirigir al dashboard
+    // El router guard ya manejará la verificación del usuario
+    await router.push('/dashboard')
   } catch (err) {
+    console.error('Register error:', err)
     if (err.response?.data?.errors) {
       error.value = err.response.data.errors
     } else {

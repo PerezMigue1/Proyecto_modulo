@@ -72,8 +72,14 @@ onMounted(async () => {
 })
 
 async function handleLogout() {
-  await authStore.logout()
-  router.push('/login')
+  try {
+    await authStore.logout()
+  } catch (error) {
+    console.error('Logout error:', error)
+  } finally {
+    // Siempre redirigir al login, incluso si hay error
+    router.push('/login')
+  }
 }
 </script>
 

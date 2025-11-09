@@ -6,8 +6,6 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const token = ref(localStorage.getItem('token') || null)
 
-  const isAuthenticated = computed(() => !!token.value && !!user.value)
-
   function setAuth(userData, authToken) {
     user.value = userData
     token.value = authToken
@@ -68,7 +66,17 @@ export const useAuthStore = defineStore('auth', () => {
   // Initialize auth token in API if exists
   if (token.value) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+    // Intentar cargar usuario si hay token
+    fetchUser().catch(() => {
+      // Si falla, limpiar token (puede ser token inválido)
+      clearAuth()
+    })
   }
+
+  const isAuthenticated = computed(() => {
+    // Considerar autenticado si hay token (el usuario se cargará después)
+    return !!token.value
+  })
 
   return {
     user,
@@ -82,4 +90,3 @@ export const useAuthStore = defineStore('auth', () => {
     logout
   }
 })
-

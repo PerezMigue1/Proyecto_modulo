@@ -104,9 +104,15 @@ const error = ref('')
 const success = ref('')
 const loading = ref(false)
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
-const googleLoginUrl = computed(() => `${apiBaseUrl.replace('/api', '')}/auth/google`)
-const facebookLoginUrl = computed(() => `${apiBaseUrl.replace('/api', '')}/auth/facebook`)
+// Construir URL del backend (sin /api)
+const getBackendBaseUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+  // Remover /api si existe al final
+  return apiUrl.replace(/\/api\/?$/, '')
+}
+
+const googleLoginUrl = computed(() => `${getBackendBaseUrl()}/auth/google`)
+const facebookLoginUrl = computed(() => `${getBackendBaseUrl()}/auth/facebook`)
 
 onMounted(() => {
   if (route.query.error) {

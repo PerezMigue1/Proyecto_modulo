@@ -42,15 +42,47 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  const isAuthenticated = authStore.isAuthenticated
+  const token = authStore.token
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else if (to.meta.requiresGuest && isAuthenticated) {
-    next('/dashboard')
-  } else {
+  // Si la ruta requiere autenticación
+  if (to.meta.requiresAuth) {
+    if (!token) {
+      // No hay token, redirigir al login
+      next('/login')
+      return
+    }
+    
+    // Hay token, verificar si tenemos el usuario
+    if (!authStore.user) {
+      try {
+        // Intentar obtener usuario
+        await authStore.fetchUser()
+      } catch (error) {
+        // Si falla, limpiar auth y redirigir al login
+        authStore.clearAuth()
+        next('/login')
+        return
+      }
+    }
+    
+    // Usuario autenticado, permitir acceso
+    next()
+  } 
+  // Si la ruta requiere que el usuario NO esté autenticado
+  else if (to.meta.requiresGuest) {
+    if (token) {
+      // Ya está autenticado, redirigir al dashboard
+      next('/dashboard')
+      return
+    }
+    
+    // No está autenticado, permitir acceso
+    next()
+  } 
+  // Ruta pública, permitir acceso
+  else {
     next()
   }
 })
