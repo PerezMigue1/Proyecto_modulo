@@ -106,20 +106,41 @@ const loading = ref(false)
 
 // Construir URL del backend (sin /api)
 const getBackendBaseUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+  // Obtener URL de la API (con fallback para producción)
+  const apiUrl = import.meta.env.VITE_API_URL || 
+    (import.meta.env.PROD 
+      ? 'https://backend-equipo.onrender.com/api' 
+      : 'http://localhost:8000/api')
+  
   // Remover /api si existe al final
-  return apiUrl.replace(/\/api\/?$/, '')
+  const baseUrl = apiUrl.replace(/\/api\/?$/, '')
+  
+  // Log para debugging
+  console.log('🔗 Backend Base URL:', baseUrl)
+  console.log('🔗 Google Login URL:', `${baseUrl}/auth/google`)
+  console.log('🔗 Facebook Login URL:', `${baseUrl}/auth/facebook`)
+  
+  return baseUrl
 }
 
 const googleLoginUrl = computed(() => `${getBackendBaseUrl()}/auth/google`)
 const facebookLoginUrl = computed(() => `${getBackendBaseUrl()}/auth/facebook`)
 
 onMounted(() => {
+  // Log de información de debug
+  console.log('🔍 Login Component Mounted')
+  console.log('🔗 API URL:', import.meta.env.VITE_API_URL)
+  console.log('🔗 Backend Base URL:', getBackendBaseUrl())
+  console.log('🔗 Google Login URL:', googleLoginUrl.value)
+  console.log('🔗 Facebook Login URL:', facebookLoginUrl.value)
+  
   if (route.query.error) {
     error.value = route.query.error
+    console.error('❌ Error from route:', route.query.error)
   }
   if (route.query.status) {
     success.value = route.query.status
+    console.log('✅ Status from route:', route.query.status)
   }
 })
 
@@ -128,10 +149,34 @@ async function handleLogin() {
   loading.value = true
 
   try {
+    console.log('🔄 Iniciando proceso de login...')
     await authStore.login(form.value.email, form.value.password)
-    router.push('/dashboard')
+    console.log('✅ Login exitoso, redirigiendo a dashboard...')
+    await router.push('/dashboard')
   } catch (err) {
-    error.value = err.response?.data?.errors?.email?.[0] || err.response?.data?.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.'
+    console.error('❌ Error en login:', err)
+    
+    // Manejar diferentes tipos de errores
+    if (err.response) {
+      // Error de respuesta del servidor
+      const errorData = err.response.data
+      if (errorData?.errors) {
+        // Errores de validación
+        const firstError = Object.values(errorData.errors)[0]
+        error.value = Array.isArray(firstError) ? firstError[0] : firstError
+      } else if (errorData?.message) {
+        error.value = errorData.message
+      } else {
+        error.value = `Error ${err.response.status}: ${err.response.statusText || 'Error al iniciar sesión'}`
+      }
+    } else if (err.request) {
+      // Error de red (sin respuesta del servidor)
+      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet y que el backend esté funcionando.'
+      console.error('❌ Network error:', err.request)
+    } else {
+      // Otro tipo de error
+      error.value = err.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.'
+    }
   } finally {
     loading.value = false
   }

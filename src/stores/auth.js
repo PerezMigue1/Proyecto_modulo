@@ -5,14 +5,24 @@ import api from '@/services/api'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const token = ref(localStorage.getItem('token') || null)
+  const loading = ref(false)
+  const error = ref(null)
+
+  // Inicializar token en API si existe
+  if (token.value) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+  }
 
   function setAuth(userData, authToken) {
     user.value = userData
     token.value = authToken
-    localStorage.setItem('token', authToken)
     if (authToken) {
+      localStorage.setItem('token', authToken)
       api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+    } else {
+      clearAuth()
     }
+    error.value = null
   }
 
   function clearAuth() {
@@ -20,42 +30,85 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     localStorage.removeItem('token')
     delete api.defaults.headers.common['Authorization']
+    error.value = null
   }
 
   async function fetchUser() {
+    if (!token.value) {
+      throw new Error('No hay token de autenticación')
+    }
+
     try {
+      loading.value = true
+      error.value = null
       const response = await api.get('/user')
       user.value = response.data
       return response.data
-    } catch (error) {
-      clearAuth()
-      throw error
+    } catch (err) {
+      console.error('Error fetching user:', err)
+      // Si es un error 401, limpiar auth
+      if (err.response?.status === 401) {
+        clearAuth()
+      }
+      throw err
+    } finally {
+      loading.value = false
     }
   }
 
   async function login(email, password) {
     try {
+      loading.value = true
+      error.value = null
+      console.log('🔐 Intentando login con:', { email })
+      
       const response = await api.post('/login', { email, password })
-      setAuth(response.data.user, response.data.token)
-      return response.data
-    } catch (error) {
-      throw error
+      
+      if (response.data.user && response.data.token) {
+        setAuth(response.data.user, response.data.token)
+        console.log('✅ Login exitoso')
+        return response.data
+      } else {
+        throw new Error('Respuesta inválida del servidor')
+      }
+    } catch (err) {
+      console.error('❌ Login error:', err)
+      error.value = err
+      throw err
+    } finally {
+      loading.value = false
     }
   }
 
   async function register(data) {
     try {
+      loading.value = true
+      error.value = null
+      console.log('📝 Intentando registro con:', { email: data.email, name: data.name })
+      
       const response = await api.post('/register', data)
-      setAuth(response.data.user, response.data.token)
-      return response.data
-    } catch (error) {
-      throw error
+      
+      if (response.data.user && response.data.token) {
+        setAuth(response.data.user, response.data.token)
+        console.log('✅ Registro exitoso')
+        return response.data
+      } else {
+        throw new Error('Respuesta inválida del servidor')
+      }
+    } catch (err) {
+      console.error('❌ Register error:', err)
+      error.value = err
+      throw err
+    } finally {
+      loading.value = false
     }
   }
 
   async function logout() {
     try {
-      await api.post('/logout')
+      if (token.value) {
+        await api.post('/logout')
+      }
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
@@ -63,24 +116,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Initialize auth token in API if exists
-  if (token.value) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-    // Intentar cargar usuario si hay token
-    fetchUser().catch(() => {
-      // Si falla, limpiar token (puede ser token inválido)
-      clearAuth()
-    })
-  }
-
   const isAuthenticated = computed(() => {
-    // Considerar autenticado si hay token (el usuario se cargará después)
     return !!token.value
   })
 
   return {
     user,
     token,
+    loading,
+    error,
     isAuthenticated,
     setAuth,
     clearAuth,

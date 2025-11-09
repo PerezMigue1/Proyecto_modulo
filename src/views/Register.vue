@@ -120,10 +120,17 @@ const error = ref('')
 const loading = ref(false)
 
 onMounted(async () => {
+  // Log de información de debug
+  console.log('🔍 Register Component Mounted')
+  console.log('🔗 API URL:', import.meta.env.VITE_API_URL)
+  
   try {
+    console.log('📋 Cargando preguntas secretas...')
     preguntas.value = await getSecretQuestions()
+    console.log('✅ Preguntas secretas cargadas:', preguntas.value.length)
   } catch (err) {
-    console.error('Error loading secret questions:', err)
+    console.error('❌ Error loading secret questions:', err)
+    // No mostrar error fatal, solo log
   }
 })
 
@@ -132,17 +139,34 @@ async function handleRegister() {
   loading.value = true
 
   try {
+    console.log('🔄 Iniciando proceso de registro...')
     const response = await authStore.register(form.value)
     
+    console.log('✅ Registro exitoso, redirigiendo a dashboard...')
     // Registro exitoso, redirigir al dashboard
-    // El router guard ya manejará la verificación del usuario
     await router.push('/dashboard')
   } catch (err) {
-    console.error('Register error:', err)
-    if (err.response?.data?.errors) {
-      error.value = err.response.data.errors
+    console.error('❌ Error en registro:', err)
+    
+    // Manejar diferentes tipos de errores
+    if (err.response) {
+      // Error de respuesta del servidor
+      const errorData = err.response.data
+      if (errorData?.errors) {
+        // Errores de validación
+        error.value = errorData.errors
+      } else if (errorData?.message) {
+        error.value = errorData.message
+      } else {
+        error.value = `Error ${err.response.status}: ${err.response.statusText || 'Error al registrarse'}`
+      }
+    } else if (err.request) {
+      // Error de red (sin respuesta del servidor)
+      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet y que el backend esté funcionando.'
+      console.error('❌ Network error:', err.request)
     } else {
-      error.value = err.response?.data?.message || 'Error al registrarse. Por favor, intenta de nuevo.'
+      // Otro tipo de error
+      error.value = err.message || 'Error al registrarse. Por favor, intenta de nuevo.'
     }
   } finally {
     loading.value = false

@@ -9,8 +9,16 @@
 
 [build.environment]
   NODE_VERSION = "20.19.0"
+  # La URL de la API se establece como variable de entorno en el Dashboard de Netlify
+  # Si no está configurada, el código usará https://backend-equipo.onrender.com/api por defecto en producción
 
-# Variables de entorno (configurar en Netlify Dashboard)
-# VITE_API_URL=https://backend-equipo.onrender.com/api
-# VITE_FRONTEND_URL=https://tu-frontend.netlify.app
+# IMPORTANTE: Configurar estas variables de entorno en Netlify Dashboard:
+# Site settings → Environment variables → Add variable
+#
+# Variables requeridas:
+# - VITE_API_URL=https://backend-equipo.onrender.com/api
+# - VITE_FRONTEND_URL=https://tu-frontend.netlify.app (opcional, para OAuth callbacks)
+#
+# Nota: Aunque el código tiene un fallback a la URL de producción,
+# es recomendable configurar VITE_API_URL explícitamente en Netlify
 
