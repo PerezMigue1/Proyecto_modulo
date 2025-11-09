@@ -84,9 +84,24 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       loading.value = true
       error.value = null
-      console.log('📝 Intentando registro con:', { email: data.email, name: data.name })
       
-      const response = await api.post('/register', data)
+      // Preparar datos para enviar al backend
+      const registerData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.password_confirmation,
+        pregunta_secreta: data.pregunta_secreta,
+        respuesta_secreta: data.respuesta_secreta
+      }
+      
+      console.log('📝 Intentando registro con:', { 
+        email: registerData.email, 
+        name: registerData.name,
+        pregunta_secreta: registerData.pregunta_secreta ? 'Configurada' : 'No configurada'
+      })
+      
+      const response = await api.post('/register', registerData)
       
       if (response.data.user && response.data.token) {
         setAuth(response.data.user, response.data.token)
@@ -97,6 +112,11 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (err) {
       console.error('❌ Register error:', err)
+      console.error('❌ Register error details:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      })
       error.value = err
       throw err
     } finally {

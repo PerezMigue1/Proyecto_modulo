@@ -138,8 +138,38 @@ async function handleRegister() {
   error.value = ''
   loading.value = true
 
+  // Validar que todos los campos estén completos
+  if (!form.value.name || !form.value.email || !form.value.password || 
+      !form.value.password_confirmation || !form.value.pregunta_secreta || 
+      !form.value.respuesta_secreta) {
+    error.value = 'Por favor, completa todos los campos.'
+    loading.value = false
+    return
+  }
+
+  // Validar que las contraseñas coincidan
+  if (form.value.password !== form.value.password_confirmation) {
+    error.value = 'Las contraseñas no coinciden.'
+    loading.value = false
+    return
+  }
+
+  // Validar que la contraseña tenga al menos 8 caracteres
+  if (form.value.password.length < 8) {
+    error.value = 'La contraseña debe tener al menos 8 caracteres.'
+    loading.value = false
+    return
+  }
+
   try {
     console.log('🔄 Iniciando proceso de registro...')
+    console.log('📤 Datos a enviar:', {
+      name: form.value.name,
+      email: form.value.email,
+      pregunta_secreta: form.value.pregunta_secreta,
+      respuesta_secreta: form.value.respuesta_secreta ? '***' : 'No configurada'
+    })
+    
     const response = await authStore.register(form.value)
     
     console.log('✅ Registro exitoso, redirigiendo a dashboard...')
@@ -147,11 +177,14 @@ async function handleRegister() {
     await router.push('/dashboard')
   } catch (err) {
     console.error('❌ Error en registro:', err)
+    console.error('❌ Error completo:', JSON.stringify(err, null, 2))
     
     // Manejar diferentes tipos de errores
     if (err.response) {
       // Error de respuesta del servidor
       const errorData = err.response.data
+      console.error('❌ Error del servidor:', errorData)
+      
       if (errorData?.errors) {
         // Errores de validación
         error.value = errorData.errors
@@ -162,8 +195,10 @@ async function handleRegister() {
       }
     } else if (err.request) {
       // Error de red (sin respuesta del servidor)
-      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet y que el backend esté funcionando.'
+      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet y que el backend esté funcionando en https://backend-equipo.onrender.com'
       console.error('❌ Network error:', err.request)
+      console.error('❌ URL intentada:', err.config?.url)
+      console.error('❌ Base URL:', err.config?.baseURL)
     } else {
       // Otro tipo de error
       error.value = err.message || 'Error al registrarse. Por favor, intenta de nuevo.'
