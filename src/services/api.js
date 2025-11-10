@@ -117,16 +117,30 @@ api.interceptors.response.use(
       // Limpiar token y redirigir al login
       // Pero NO hacer esto en el callback de OAuth o durante la navegación inicial
       const isAuthCallback = window.location.pathname === '/auth/callback'
-      const isNavigating = error.config?.url === '/user' && error.config?.method === 'get'
+      const isLoginOrRegister = window.location.pathname === '/login' || window.location.pathname === '/register'
+      const isNavigatingToDashboard = error.config?.url === '/user' && from?.path === '/auth/callback'
+      
+      console.log('🔍 Error 401 detectado:', {
+        isAuthCallback,
+        isLoginOrRegister,
+        isNavigatingToDashboard,
+        currentPath: window.location.pathname,
+        errorUrl: error.config?.url
+      })
+      
+      // NO limpiar token ni redirigir si estamos en el callback de OAuth
+      // El callback manejará el error y redirigirá apropiadamente
+      if (isAuthCallback || isNavigatingToDashboard) {
+        console.log('⚠️ Error 401 durante callback OAuth, no limpiando token ni redirigiendo')
+        return Promise.reject(error)
+      }
       
       localStorage.removeItem('token')
       
       // Solo redirigir si no estamos en el callback o en páginas de auth
-      if (!isAuthCallback && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        // Solo redirigir si no estamos en medio de una navegación crítica
-        if (!isNavigating || window.location.pathname === '/dashboard') {
-          window.location.href = '/login'
-        }
+      if (!isAuthCallback && !isLoginOrRegister) {
+        console.log('🔄 Redirigiendo al login debido a error 401')
+        window.location.href = '/login'
       }
     }
     

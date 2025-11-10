@@ -14,15 +14,30 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setAuth(userData, authToken) {
+    console.log('🔄 setAuth llamado:', { hasUserData: !!userData, hasToken: !!authToken })
     user.value = userData
     token.value = authToken
     if (authToken) {
+      // Guardar en localStorage primero
       localStorage.setItem('token', authToken)
+      console.log('✅ Token guardado en localStorage')
+      
+      // Configurar header de autorización
       api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+      console.log('✅ Header de autorización configurado')
+      
+      // Verificar que se guardó correctamente
+      const savedToken = localStorage.getItem('token')
+      if (savedToken !== authToken) {
+        console.error('❌ Error: El token no se guardó correctamente en localStorage')
+      } else {
+        console.log('✅ Token verificado en localStorage')
+      }
     } else {
       clearAuth()
     }
     error.value = null
+    console.log('✅ setAuth completado. Token en store:', token.value ? 'Presente' : 'No presente')
   }
 
   function clearAuth() {
@@ -35,19 +50,30 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchUser() {
     if (!token.value) {
+      console.error('❌ No hay token para obtener usuario')
       throw new Error('No hay token de autenticación')
     }
 
     try {
       loading.value = true
       error.value = null
+      console.log('🔄 Obteniendo usuario del backend...')
+      console.log('🔄 Token usado:', token.value.substring(0, 20) + '...')
+      
       const response = await api.get('/user')
+      console.log('✅ Usuario obtenido:', response.data)
+      
       user.value = response.data
       return response.data
     } catch (err) {
-      console.error('Error fetching user:', err)
+      console.error('❌ Error fetching user:', err)
+      console.error('❌ Error response:', err.response)
+      console.error('❌ Error status:', err.response?.status)
+      console.error('❌ Error data:', err.response?.data)
+      
       // Si es un error 401, limpiar auth
       if (err.response?.status === 401) {
+        console.error('❌ Token inválido (401), limpiando auth...')
         clearAuth()
       }
       throw err
