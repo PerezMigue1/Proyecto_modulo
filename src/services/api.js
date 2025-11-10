@@ -118,20 +118,21 @@ api.interceptors.response.use(
       // Pero NO hacer esto en el callback de OAuth o durante la navegación inicial
       const isAuthCallback = window.location.pathname === '/auth/callback'
       const isLoginOrRegister = window.location.pathname === '/login' || window.location.pathname === '/register'
-      const isNavigatingToDashboard = error.config?.url === '/user' && from?.path === '/auth/callback'
+      const isFetchingUser = error.config?.url === '/user' && error.config?.method === 'get'
       
       console.log('🔍 Error 401 detectado:', {
         isAuthCallback,
         isLoginOrRegister,
-        isNavigatingToDashboard,
+        isFetchingUser,
         currentPath: window.location.pathname,
         errorUrl: error.config?.url
       })
       
       // NO limpiar token ni redirigir si estamos en el callback de OAuth
       // El callback manejará el error y redirigirá apropiadamente
-      if (isAuthCallback || isNavigatingToDashboard) {
+      if (isAuthCallback) {
         console.log('⚠️ Error 401 durante callback OAuth, no limpiando token ni redirigiendo')
+        console.log('⚠️ El callback manejará este error')
         return Promise.reject(error)
       }
       
