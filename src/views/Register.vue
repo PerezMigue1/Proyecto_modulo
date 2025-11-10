@@ -242,14 +242,42 @@ async function handleRegister() {
         const errors = errorData.errors
         const errorMessages = []
         
+        // Traducciones de mensajes comunes
+        const translateError = (field, message) => {
+          const translations = {
+            'validation.unique': `El ${field === 'email' ? 'correo electrónico' : field} ya está registrado. Por favor, usa otro.`,
+            'validation.required': `El campo ${field} es obligatorio.`,
+            'validation.email': 'Por favor, ingresa un correo electrónico válido.',
+            'validation.min.string': `La contraseña debe tener al menos 8 caracteres.`,
+            'validation.confirmed': 'Las contraseñas no coinciden.',
+            'validation.string': `El campo ${field} debe ser texto.`,
+            'validation.max.string': `El campo ${field} es demasiado largo.`
+          }
+          
+          // Si el mensaje es una clave de traducción, traducirlo
+          if (translations[message]) {
+            return translations[message]
+          }
+          
+          // Si el mensaje ya es legible, usarlo directamente
+          if (typeof message === 'string' && !message.startsWith('validation.')) {
+            return message
+          }
+          
+          // Mensaje por defecto
+          return `Error en ${field}: ${message}`
+        }
+        
         // Recorrer todos los errores y construir mensajes
         for (const [field, messages] of Object.entries(errors)) {
           if (Array.isArray(messages)) {
             messages.forEach(msg => {
-              errorMessages.push(`${field}: ${msg}`)
+              const translatedMsg = translateError(field, msg)
+              errorMessages.push(translatedMsg)
             })
           } else {
-            errorMessages.push(`${field}: ${messages}`)
+            const translatedMsg = translateError(field, messages)
+            errorMessages.push(translatedMsg)
           }
         }
         
@@ -259,9 +287,6 @@ async function handleRegister() {
         } else {
           error.value = 'Error de validación. Por favor, verifica los datos ingresados.'
         }
-        
-        // También guardar el objeto completo para mostrar en la UI
-        error.value = errors
       } else if (errorData?.message) {
         error.value = errorData.message
       } else {

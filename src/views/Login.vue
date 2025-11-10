@@ -156,20 +156,45 @@ async function handleLogin() {
   } catch (err) {
     console.error('❌ Error en login:', err)
     
-    // Manejar diferentes tipos de errores
-    if (err.response) {
-      // Error de respuesta del servidor
-      const errorData = err.response.data
-      if (errorData?.errors) {
-        // Errores de validación
-        const firstError = Object.values(errorData.errors)[0]
-        error.value = Array.isArray(firstError) ? firstError[0] : firstError
-      } else if (errorData?.message) {
-        error.value = errorData.message
-      } else {
-        error.value = `Error ${err.response.status}: ${err.response.statusText || 'Error al iniciar sesión'}`
-      }
-    } else if (err.request) {
+        // Manejar diferentes tipos de errores
+        if (err.response) {
+          // Error de respuesta del servidor
+          const errorData = err.response.data
+          
+          // Traducciones de mensajes comunes
+          const translateError = (message) => {
+            const translations = {
+              'validation.unique': 'El correo electrónico ya está registrado.',
+              'validation.required': 'Todos los campos son obligatorios.',
+              'validation.email': 'Por favor, ingresa un correo electrónico válido.',
+              'The provided credentials are incorrect.': 'Las credenciales son incorrectas. Verifica tu correo y contraseña.'
+            }
+            
+            // Si el mensaje es una clave de traducción, traducirlo
+            if (translations[message]) {
+              return translations[message]
+            }
+            
+            // Si el mensaje ya es legible, usarlo directamente
+            if (typeof message === 'string' && !message.startsWith('validation.')) {
+              return message
+            }
+            
+            // Mensaje por defecto
+            return message
+          }
+          
+          if (errorData?.errors) {
+            // Errores de validación
+            const firstError = Object.values(errorData.errors)[0]
+            const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError
+            error.value = translateError(errorMessage)
+          } else if (errorData?.message) {
+            error.value = translateError(errorData.message)
+          } else {
+            error.value = `Error ${err.response.status}: ${err.response.statusText || 'Error al iniciar sesión'}`
+          }
+        } else if (err.request) {
       // Error de red (sin respuesta del servidor)
       const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-equipo.onrender.com/api'
       error.value = `No se pudo conectar con el servidor. Verifica que el backend esté funcionando en ${apiUrl}`
