@@ -223,9 +223,9 @@ async function handleRegister() {
     
     const response = await authStore.register(form.value)
     
-    console.log('✅ Registro exitoso, redirigiendo a dashboard...')
-    // Registro exitoso, redirigir al dashboard
-    await router.push('/dashboard')
+    console.log('✅ Registro exitoso, redirigiendo a login...')
+    // Registro exitoso, redirigir al login con mensaje de éxito
+    await router.push('/login?status=registro-exitoso')
   } catch (err) {
     console.error('❌ Error en registro:', err)
     console.error('❌ Error completo:', JSON.stringify(err, null, 2))

@@ -103,11 +103,17 @@ export const useAuthStore = defineStore('auth', () => {
       
       const response = await api.post('/register', registerData)
       
-      if (response.data.user && response.data.token) {
-        setAuth(response.data.user, response.data.token)
-        console.log('✅ Registro exitoso')
-        return response.data
+      console.log('✅ Respuesta del registro:', response.status, response.data)
+      
+      // Verificar que el registro fue exitoso (status 201 o 200)
+      // Aceptar cualquier respuesta exitosa, incluso si no incluye token
+      if (response.status === 201 || response.status === 200) {
+        console.log('✅ Registro exitoso - Usuario creado en la base de datos')
+        // NO establecer autenticación automática después del registro
+        // El usuario debe hacer login manualmente
+        return { success: true, message: 'Registro exitoso' }
       } else {
+        console.error('❌ Status code inesperado:', response.status)
         throw new Error('Respuesta inválida del servidor')
       }
     } catch (err) {

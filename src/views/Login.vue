@@ -135,17 +135,22 @@ onMounted(() => {
   console.log('🔗 Facebook Login URL:', facebookLoginUrl.value)
   
   if (route.query.error) {
-    error.value = route.query.error
+    error.value = decodeURIComponent(route.query.error)
     console.error('❌ Error from route:', route.query.error)
   }
   if (route.query.status) {
-    success.value = route.query.status
+    if (route.query.status === 'registro-exitoso') {
+      success.value = 'Registro exitoso. Por favor, inicia sesión con tus credenciales.'
+    } else {
+      success.value = decodeURIComponent(route.query.status)
+    }
     console.log('✅ Status from route:', route.query.status)
   }
 })
 
 async function handleLogin() {
   error.value = ''
+  success.value = '' // Limpiar mensaje de éxito al intentar login
   loading.value = true
 
   try {
