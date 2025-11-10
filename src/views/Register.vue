@@ -33,7 +33,11 @@
             v-model="form.name"
             required
             placeholder="Juan Pérez"
+            @input="formatName"
+            @blur="validateName"
           />
+          <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
+          <small class="help-text">Solo letras y espacios</small>
         </div>
 
         <div class="form-group">
@@ -44,31 +48,88 @@
             v-model="form.email"
             required
             placeholder="tu@correo.com"
+            @blur="validateEmail"
           />
+          <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Número de teléfono</label>
+          <input
+            type="tel"
+            id="telefono"
+            v-model="form.telefono"
+            required
+            placeholder="1234567890"
+            maxlength="10"
+            @input="formatPhone"
+            @blur="validatePhone"
+          />
+          <span v-if="errors.telefono" class="error-message">{{ errors.telefono }}</span>
+          <small class="help-text">10 dígitos sin espacios ni guiones</small>
         </div>
 
         <div class="form-group">
           <label for="password">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            v-model="form.password"
-            required
-            minlength="8"
-            placeholder="••••••••"
-          />
+          <div class="password-input-wrapper">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              id="password"
+              v-model="form.password"
+              required
+              minlength="8"
+              placeholder="••••••••"
+              @blur="validatePassword"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              @click="showPassword = !showPassword"
+              :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <svg v-if="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
+                <path d="M2 2l20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6.343 6.343l11.314 11.314" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
+          <small class="help-text">Mínimo 8 caracteres: letras, números y símbolo</small>
         </div>
 
         <div class="form-group">
           <label for="password_confirmation">Confirmar contraseña</label>
-          <input
-            type="password"
-            id="password_confirmation"
-            v-model="form.password_confirmation"
-            required
-            minlength="8"
-            placeholder="••••••••"
-          />
+          <div class="password-input-wrapper">
+            <input
+              :type="showPasswordConfirmation ? 'text' : 'password'"
+              id="password_confirmation"
+              v-model="form.password_confirmation"
+              required
+              minlength="8"
+              placeholder="••••••••"
+              @blur="validatePasswordConfirmation"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              @click="showPasswordConfirmation = !showPasswordConfirmation"
+              :aria-label="showPasswordConfirmation ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <svg v-if="showPasswordConfirmation" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
+                <path d="M2 2l20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6.343 6.343l11.314 11.314" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <span v-if="errors.password_confirmation" class="error-message">{{ errors.password_confirmation }}</span>
         </div>
 
         <div class="form-group">
@@ -124,6 +185,7 @@ const authStore = useAuthStore()
 const form = ref({
   name: '',
   email: '',
+  telefono: '',
   password: '',
   password_confirmation: '',
   pregunta_secreta: '',
@@ -132,9 +194,18 @@ const form = ref({
 
 const preguntas = ref([])
 const error = ref('')
+const errors = ref({
+  name: '',
+  email: '',
+  telefono: '',
+  password: '',
+  password_confirmation: ''
+})
 const loading = ref(false)
 const loadingPreguntas = ref(true)
 const errorPreguntas = ref('')
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
 
 onMounted(async () => {
   // Log de información de debug
@@ -185,29 +256,199 @@ onMounted(async () => {
   }
 })
 
+// Función para formatear nombre: solo letras y espacios en tiempo real
+function formatName() {
+  // Eliminar todo lo que no sea letra, espacio o acento
+  form.value.name = form.value.name.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+  // Eliminar espacios múltiples
+  form.value.name = form.value.name.replace(/\s+/g, ' ')
+  validateName()
+}
+
+// Función para validar nombre: solo letras y espacios
+function validateName() {
+  const name = form.value.name.trim()
+  errors.value.name = ''
+  
+  if (!name) {
+    errors.value.name = 'El nombre es obligatorio.'
+    return false
+  }
+  
+  // Solo letras, espacios y acentos
+  const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/
+  if (!nameRegex.test(name)) {
+    errors.value.name = 'El nombre solo puede contener letras y espacios.'
+    return false
+  }
+  
+  if (name.length < 2) {
+    errors.value.name = 'El nombre debe tener al menos 2 caracteres.'
+    return false
+  }
+  
+  return true
+}
+
+// Función para validar email: formato válido
+function validateEmail() {
+  const email = form.value.email.trim()
+  errors.value.email = ''
+  
+  if (!email) {
+    errors.value.email = 'El correo electrónico es obligatorio.'
+    return false
+  }
+  
+  // Regex para validar formato de email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    errors.value.email = 'Por favor, ingresa un correo electrónico válido.'
+    return false
+  }
+  
+  return true
+}
+
+// Función para formatear y validar teléfono: solo números, 10 dígitos
+function formatPhone() {
+  // Eliminar todo lo que no sea número
+  form.value.telefono = form.value.telefono.replace(/\D/g, '')
+  // Limitar a 10 dígitos
+  if (form.value.telefono.length > 10) {
+    form.value.telefono = form.value.telefono.substring(0, 10)
+  }
+  validatePhone()
+}
+
+function validatePhone() {
+  const telefono = form.value.telefono.trim()
+  errors.value.telefono = ''
+  
+  if (!telefono) {
+    errors.value.telefono = 'El número de teléfono es obligatorio.'
+    return false
+  }
+  
+  // Solo números
+  const phoneRegex = /^\d+$/
+  if (!phoneRegex.test(telefono)) {
+    errors.value.telefono = 'El teléfono solo puede contener números.'
+    return false
+  }
+  
+  // Exactamente 10 dígitos
+  if (telefono.length !== 10) {
+    errors.value.telefono = 'El teléfono debe tener exactamente 10 dígitos.'
+    return false
+  }
+  
+  return true
+}
+
+// Función para validar contraseña: mínimo 8 caracteres, letras, números y símbolo
+function validatePassword() {
+  const password = form.value.password
+  errors.value.password = ''
+  
+  if (!password) {
+    errors.value.password = 'La contraseña es obligatoria.'
+    return false
+  }
+  
+  if (password.length < 8) {
+    errors.value.password = 'La contraseña debe tener al menos 8 caracteres.'
+    return false
+  }
+  
+  // Verificar que tenga al menos una letra
+  const hasLetter = /[a-zA-Z]/.test(password)
+  if (!hasLetter) {
+    errors.value.password = 'La contraseña debe contener al menos una letra.'
+    return false
+  }
+  
+  // Verificar que tenga al menos un número
+  const hasNumber = /\d/.test(password)
+  if (!hasNumber) {
+    errors.value.password = 'La contraseña debe contener al menos un número.'
+    return false
+  }
+  
+  // Verificar que tenga al menos un símbolo
+  const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+  if (!hasSymbol) {
+    errors.value.password = 'La contraseña debe contener al menos un símbolo (!@#$%^&*...).'
+    return false
+  }
+  
+  // Validar confirmación de contraseña si está llena
+  if (form.value.password_confirmation) {
+    validatePasswordConfirmation()
+  }
+  
+  return true
+}
+
+// Función para validar confirmación de contraseña
+function validatePasswordConfirmation() {
+  const password = form.value.password
+  const passwordConfirmation = form.value.password_confirmation
+  errors.value.password_confirmation = ''
+  
+  if (!passwordConfirmation) {
+    errors.value.password_confirmation = 'Por favor, confirma tu contraseña.'
+    return false
+  }
+  
+  if (password !== passwordConfirmation) {
+    errors.value.password_confirmation = 'Las contraseñas no coinciden.'
+    return false
+  }
+  
+  return true
+}
+
+// Función para validar todos los campos
+function validateAllFields() {
+  let isValid = true
+  
+  // Validar cada campo
+  if (!validateName()) isValid = false
+  if (!validateEmail()) isValid = false
+  if (!validatePhone()) isValid = false
+  if (!validatePassword()) isValid = false
+  if (!validatePasswordConfirmation()) isValid = false
+  
+  // Validar pregunta secreta
+  if (!form.value.pregunta_secreta) {
+    error.value = 'Por favor, selecciona una pregunta secreta.'
+    isValid = false
+  }
+  
+  // Validar respuesta secreta
+  if (!form.value.respuesta_secreta || !form.value.respuesta_secreta.trim()) {
+    error.value = 'Por favor, ingresa una respuesta secreta.'
+    isValid = false
+  }
+  
+  return isValid
+}
+
 async function handleRegister() {
   error.value = ''
+  // Limpiar errores individuales
+  errors.value = {
+    name: '',
+    email: '',
+    telefono: '',
+    password: '',
+    password_confirmation: ''
+  }
   loading.value = true
 
-  // Validar que todos los campos estén completos
-  if (!form.value.name || !form.value.email || !form.value.password || 
-      !form.value.password_confirmation || !form.value.pregunta_secreta || 
-      !form.value.respuesta_secreta) {
-    error.value = 'Por favor, completa todos los campos.'
-    loading.value = false
-    return
-  }
-
-  // Validar que las contraseñas coincidan
-  if (form.value.password !== form.value.password_confirmation) {
-    error.value = 'Las contraseñas no coinciden.'
-    loading.value = false
-    return
-  }
-
-  // Validar que la contraseña tenga al menos 8 caracteres
-  if (form.value.password.length < 8) {
-    error.value = 'La contraseña debe tener al menos 8 caracteres.'
+  // Validar todos los campos
+  if (!validateAllFields()) {
     loading.value = false
     return
   }
@@ -217,11 +458,23 @@ async function handleRegister() {
     console.log('📤 Datos a enviar:', {
       name: form.value.name,
       email: form.value.email,
+      telefono: form.value.telefono,
       pregunta_secreta: form.value.pregunta_secreta,
       respuesta_secreta: form.value.respuesta_secreta ? '***' : 'No configurada'
     })
     
-    const response = await authStore.register(form.value)
+    // Preparar datos para enviar (limpiar espacios)
+    const registerData = {
+      name: form.value.name.trim(),
+      email: form.value.email.trim(),
+      telefono: form.value.telefono.trim(),
+      password: form.value.password,
+      password_confirmation: form.value.password_confirmation,
+      pregunta_secreta: form.value.pregunta_secreta,
+      respuesta_secreta: form.value.respuesta_secreta.trim()
+    }
+    
+    const response = await authStore.register(registerData)
     
     console.log('✅ Registro exitoso, redirigiendo a login...')
     // Registro exitoso, redirigir al login con mensaje de éxito
@@ -330,6 +583,133 @@ select {
 select:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+}
+
+.help-text {
+  color: #718096;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+input:invalid {
+  border-color: #e53e3e;
+}
+
+input:valid {
+  border-color: #48bb78;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding: 12px 45px 12px 16px !important;
+  box-sizing: border-box;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #718096;
+  transition: color 0.2s;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+}
+
+.password-toggle:hover {
+  color: #4a5568;
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: #667eea;
+}
+
+.password-toggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.password-toggle svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .password-input-wrapper input {
+    padding: 11px 40px 11px 14px !important;
+  }
+
+  .password-toggle {
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+  }
+
+  .password-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  select {
+    padding: 11px 14px;
+    font-size: 16px;
+  }
+
+  .help-text {
+    font-size: 11px;
+  }
+
+  .error-message {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .password-input-wrapper input {
+    padding: 10px 38px 10px 12px !important;
+  }
+
+  .password-toggle {
+    right: 5px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .password-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 </style>
 

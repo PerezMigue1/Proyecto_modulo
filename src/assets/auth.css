@@ -4,20 +4,18 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+/* Estilos para el contenedor de autenticación */
 .login-container {
   width: 100%;
   max-width: 450px;
   margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .login-card {
@@ -29,6 +27,7 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.5s ease-out;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 @keyframes slideIn {
@@ -51,11 +50,13 @@ body {
   font-weight: 700;
   color: #1a202c;
   margin-bottom: 10px;
+  line-height: 1.2;
 }
 
 .login-header p {
   color: #718096;
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .login-form {
@@ -83,6 +84,8 @@ body {
   font-size: 16px;
   transition: all 0.3s ease;
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group input:focus {
@@ -115,6 +118,8 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -276,13 +281,166 @@ body {
   padding: 2px 0;
 }
 
-@media (max-width: 768px) {
+/* Tablets y pantallas medianas */
+@media (max-width: 1024px) {
+  .login-container {
+    padding: 20px;
+  }
+  
   .login-card {
-    padding: 30px 20px;
+    padding: 35px 30px;
+  }
+}
+
+/* Tablets pequeñas */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 15px;
+    min-height: 100vh;
+  }
+  
+  .login-card {
+    padding: 30px 25px;
+    border-radius: 16px;
   }
 
   .login-header h1 {
     font-size: 28px;
+  }
+
+  .login-header p {
+    font-size: 14px;
+  }
+}
+
+/* Móviles grandes */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  
+  .login-card {
+    padding: 25px 20px;
+    border-radius: 16px;
+    margin: 0;
+    max-width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  .login-header {
+    margin-bottom: 25px;
+  }
+
+  .login-header h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .login-header p {
+    font-size: 13px;
+  }
+
+  .form-group {
+    gap: 6px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-group input {
+    padding: 11px 14px;
+    font-size: 16px; /* Mantener 16px para evitar zoom en iOS */
+    border-radius: 8px;
+  }
+
+  .btn-primary {
+    padding: 13px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  .btn-google,
+  .btn-facebook {
+    padding: 13px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  .divider {
+    margin: 15px 0;
+    font-size: 12px;
+  }
+
+  .divider span {
+    padding: 0 12px;
+  }
+
+  .login-footer {
+    margin-top: 25px;
+    padding-top: 20px;
+  }
+
+  .login-footer p {
+    font-size: 13px;
+  }
+
+  .link {
+    font-size: 13px;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 360px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-card {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .login-header h1 {
+    font-size: 22px;
+  }
+
+  .login-header p {
+    font-size: 12px;
+  }
+
+  .form-group input {
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  .btn-primary,
+  .btn-google,
+  .btn-facebook {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+}
+
+/* Pantallas muy grandes */
+@media (min-width: 1440px) {
+  .login-container {
+    max-width: 500px;
+  }
+  
+  .login-card {
+    max-width: 500px;
+    padding: 45px;
   }
 }
 

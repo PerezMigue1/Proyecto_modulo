@@ -115,6 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
       const registerData = {
         name: data.name,
         email: data.email,
+        telefono: data.telefono,
         password: data.password,
         password_confirmation: data.password_confirmation,
         pregunta_secreta: data.pregunta_secreta,
