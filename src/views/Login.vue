@@ -165,6 +165,13 @@ async function handleLogin() {
         if (err.response) {
           // Error de respuesta del servidor
           const errorData = err.response.data
+          const status = err.response.status
+          
+          console.error('❌ Error del servidor en login:', {
+            status,
+            statusText: err.response.statusText,
+            data: errorData
+          })
           
           // Traducciones de mensajes comunes
           const translateError = (message) => {
@@ -189,7 +196,23 @@ async function handleLogin() {
             return message
           }
           
-          if (errorData?.errors) {
+          // Manejar error 500 específicamente
+          if (status === 500) {
+            console.error('❌ Error 500: Error interno del servidor')
+            console.error('❌ Esto puede deberse a:')
+            console.error('   - Problema con la base de datos')
+            console.error('   - Problema con la autenticación')
+            console.error('   - Error en el backend')
+            
+            // Mostrar mensaje amigable al usuario
+            error.value = 'Error del servidor. Por favor, intenta de nuevo más tarde. Si el problema persiste, contacta al administrador.'
+            
+            // Si hay un mensaje en la respuesta, intentar mostrarlo
+            if (errorData?.message) {
+              console.error('❌ Mensaje del servidor:', errorData.message)
+              error.value = `Error del servidor: ${errorData.message}`
+            }
+          } else if (errorData?.errors) {
             // Errores de validación
             const firstError = Object.values(errorData.errors)[0]
             const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError
@@ -197,7 +220,7 @@ async function handleLogin() {
           } else if (errorData?.message) {
             error.value = translateError(errorData.message)
           } else {
-            error.value = `Error ${err.response.status}: ${err.response.statusText || 'Error al iniciar sesión'}`
+            error.value = `Error ${status}: ${err.response.statusText || 'Error al iniciar sesión'}`
           }
         } else if (err.request) {
       // Error de red (sin respuesta del servidor)
