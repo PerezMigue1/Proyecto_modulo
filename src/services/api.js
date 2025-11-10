@@ -88,7 +88,23 @@ api.interceptors.response.use(
     // Log detallado de errores 500 (error del servidor)
     if (error.response?.status === 500) {
       console.error('❌ Error 500 - Error interno del servidor')
-      console.error('❌ Verifica los logs del backend')
+      console.error('❌ Verifica los logs del backend en Render')
+      console.error('❌ Datos de la respuesta:', error.response.data)
+      console.error('❌ Headers de la respuesta:', error.response.headers)
+      
+      // Intentar extraer más información del error
+      if (error.response.data) {
+        console.error('❌ Mensaje del servidor:', error.response.data.message || error.response.data.error || 'Sin mensaje')
+        if (error.response.data.exception) {
+          console.error('❌ Excepción:', error.response.data.exception)
+        }
+        if (error.response.data.file) {
+          console.error('❌ Archivo:', error.response.data.file)
+        }
+        if (error.response.data.line) {
+          console.error('❌ Línea:', error.response.data.line)
+        }
+      }
     }
     
     // Log detallado de errores 404 (no encontrado)

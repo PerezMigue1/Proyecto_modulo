@@ -203,15 +203,31 @@ async function handleLogin() {
             console.error('   - Problema con la base de datos')
             console.error('   - Problema con la autenticación')
             console.error('   - Error en el backend')
+            console.error('❌ Datos completos de la respuesta:', errorData)
             
             // Mostrar mensaje amigable al usuario
-            error.value = 'Error del servidor. Por favor, intenta de nuevo más tarde. Si el problema persiste, contacta al administrador.'
+            let errorMessage = 'Error del servidor. Por favor, intenta de nuevo más tarde.'
             
-            // Si hay un mensaje en la respuesta, intentar mostrarlo
-            if (errorData?.message) {
+            // Intentar extraer información útil del error
+            if (errorData?.message && errorData.message !== 'Server Error') {
               console.error('❌ Mensaje del servidor:', errorData.message)
-              error.value = `Error del servidor: ${errorData.message}`
+              errorMessage = `Error del servidor: ${errorData.message}`
+            } else if (errorData?.exception) {
+              console.error('❌ Excepción del servidor:', errorData.exception)
+              // Si APP_DEBUG está habilitado, podríamos ver más detalles
+              if (errorData.exception.includes('createToken')) {
+                errorMessage = 'Error de configuración: El backend no está configurado correctamente para autenticación.'
+              } else if (errorData.exception.includes('MongoDB')) {
+                errorMessage = 'Error de conexión: No se pudo conectar a la base de datos.'
+              } else {
+                errorMessage = `Error del servidor: ${errorData.exception}`
+              }
+            } else if (errorData?.error) {
+              console.error('❌ Error del servidor:', errorData.error)
+              errorMessage = `Error del servidor: ${errorData.error}`
             }
+            
+            error.value = errorMessage
           } else if (errorData?.errors) {
             // Errores de validación
             const firstError = Object.values(errorData.errors)[0]
