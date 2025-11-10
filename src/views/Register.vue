@@ -161,6 +161,25 @@
           />
         </div>
 
+        <!-- Términos y Condiciones -->
+        <div class="form-group terms-container">
+          <div class="terms-checkbox">
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              v-model="form.acceptTerms"
+              class="terms-checkbox-input"
+            />
+            <label for="acceptTerms" class="terms-label">
+              Acepto los 
+              <button type="button" class="terms-link" @click="openTermsModal">
+                Términos y Condiciones
+              </button>
+            </label>
+          </div>
+          <span v-if="errors.acceptTerms" class="error-message">{{ errors.acceptTerms }}</span>
+        </div>
+
         <button type="submit" class="btn-primary" :disabled="loading">
           {{ loading ? 'Registrando...' : 'Registrarse' }}
         </button>
@@ -168,6 +187,58 @@
 
       <div class="login-footer">
         <p>¿Ya tienes cuenta? <router-link to="/login" class="link">Inicia sesión aquí</router-link></p>
+      </div>
+    </div>
+
+    <!-- Modal de Términos y Condiciones -->
+    <div v-if="showTermsModal" class="modal-overlay" @click="showTermsModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2>Términos y Condiciones</h2>
+          <button class="modal-close" @click="showTermsModal = false">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-content">
+            <h3>1. Aceptación de los Términos</h3>
+            <p>Al registrarte en nuestra plataforma, aceptas cumplir con estos términos y condiciones en su totalidad.</p>
+            
+            <h3>2. Uso de la Cuenta</h3>
+            <p>Eres responsable de mantener la confidencialidad de tu cuenta y contraseña. Aceptas notificarnos inmediatamente sobre cualquier uso no autorizado de tu cuenta.</p>
+            
+            <h3>3. Privacidad y Datos Personales</h3>
+            <p>Nos comprometemos a proteger tu privacidad. Tus datos personales serán tratados de acuerdo con nuestra Política de Privacidad.</p>
+            
+            <h3>4. Conducta del Usuario</h3>
+            <p>Te comprometes a utilizar la plataforma de manera legal y ética. No podrás utilizar nuestros servicios para actividades ilícitas.</p>
+            
+            <h3>5. Propiedad Intelectual</h3>
+            <p>Todo el contenido de la plataforma está protegido por derechos de autor y otras leyes de propiedad intelectual.</p>
+            
+            <h3>6. Modificaciones</h3>
+            <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones serán notificadas a los usuarios.</p>
+            
+            <h3>7. Limitación de Responsabilidad</h3>
+            <p>No seremos responsables por daños indirectos, incidentales o consecuentes resultantes del uso de nuestros servicios.</p>
+            
+            <h3>8. Terminación</h3>
+            <p>Podemos suspender o terminar tu acceso a la plataforma si violas estos términos y condiciones.</p>
+            
+            <p class="terms-update">Última actualización: {{ new Date().toLocaleDateString() }}</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" @click="acceptTermsAndClose">
+            Aceptar Términos
+          </button>
+          <button class="btn-secondary" @click="showTermsModal = false">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -189,7 +260,8 @@ const form = ref({
   password: '',
   password_confirmation: '',
   pregunta_secreta: '',
-  respuesta_secreta: ''
+  respuesta_secreta: '',
+  acceptTerms: false
 })
 
 const preguntas = ref([])
@@ -199,13 +271,15 @@ const errors = ref({
   email: '',
   telefono: '',
   password: '',
-  password_confirmation: ''
+  password_confirmation: '',
+  acceptTerms: ''
 })
 const loading = ref(false)
 const loadingPreguntas = ref(true)
 const errorPreguntas = ref('')
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
+const showTermsModal = ref(false)
 
 onMounted(async () => {
   // Log de información de debug
@@ -255,6 +329,20 @@ onMounted(async () => {
     loadingPreguntas.value = false
   }
 })
+
+// Función para aceptar términos y cerrar el modal
+function acceptTermsAndClose() {
+  form.value.acceptTerms = true
+  showTermsModal.value = false
+  errors.value.acceptTerms = ''
+}
+
+// Función para abrir el modal sin activar el checkbox
+function openTermsModal(event) {
+  event.preventDefault()
+  event.stopPropagation()
+  showTermsModal.value = true
+}
 
 // Función para formatear nombre: solo letras y espacios en tiempo real
 function formatName() {
@@ -409,6 +497,18 @@ function validatePasswordConfirmation() {
   return true
 }
 
+// Función para validar términos y condiciones
+function validateTerms() {
+  errors.value.acceptTerms = ''
+  
+  if (!form.value.acceptTerms) {
+    errors.value.acceptTerms = 'Debes aceptar los términos y condiciones para registrarte.'
+    return false
+  }
+  
+  return true
+}
+
 // Función para validar todos los campos
 function validateAllFields() {
   let isValid = true
@@ -419,6 +519,7 @@ function validateAllFields() {
   if (!validatePhone()) isValid = false
   if (!validatePassword()) isValid = false
   if (!validatePasswordConfirmation()) isValid = false
+  if (!validateTerms()) isValid = false
   
   // Validar pregunta secreta
   if (!form.value.pregunta_secreta) {
@@ -443,7 +544,8 @@ async function handleRegister() {
     email: '',
     telefono: '',
     password: '',
-    password_confirmation: ''
+    password_confirmation: '',
+    acceptTerms: ''
   }
   loading.value = true
 
@@ -460,7 +562,8 @@ async function handleRegister() {
       email: form.value.email,
       telefono: form.value.telefono,
       pregunta_secreta: form.value.pregunta_secreta,
-      respuesta_secreta: form.value.respuesta_secreta ? '***' : 'No configurada'
+      respuesta_secreta: form.value.respuesta_secreta ? '***' : 'No configurada',
+      acceptTerms: form.value.acceptTerms
     })
     
     // Preparar datos para enviar (limpiar espacios)
@@ -664,6 +767,184 @@ select {
   box-sizing: border-box;
 }
 
+/* Estilos para Términos y Condiciones */
+.terms-container {
+  margin: 16px 0;
+  padding: 0;
+}
+
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  max-width: 18px;
+  box-sizing: border-box;
+}
+
+.terms-checkbox-input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  cursor: pointer;
+  accent-color: #667eea;
+  margin: 0;
+  margin-top: 2px;
+}
+
+.terms-label {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #374151;
+  cursor: pointer;
+  margin: 0;
+  flex: 1;
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.terms-link {
+  background: none;
+  border: none;
+  color: #667eea;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  display: inline;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.terms-link:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+/* Estilos del Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #1a202c;
+  font-size: 1.5rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: #718096;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background-color: #f7fafc;
+  color: #4a5568;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e0;
+}
+
+/* Estilos del contenido de términos */
+.terms-content {
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+.terms-content h3 {
+  color: #2d3748;
+  margin: 20px 0 10px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.terms-content h3:first-child {
+  margin-top: 0;
+}
+
+.terms-content p {
+  margin-bottom: 15px;
+}
+
+.terms-update {
+  font-style: italic;
+  color: #718096;
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
 @media (max-width: 480px) {
   .password-input-wrapper input {
     padding: 11px 40px 11px 14px !important;
@@ -692,6 +973,46 @@ select {
 
   .error-message {
     font-size: 12px;
+  }
+
+  .modal-content {
+    margin: 10px;
+    max-height: 90vh;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .terms-container {
+    margin: 14px 0;
+  }
+
+  .terms-checkbox {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .terms-checkbox-input {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+  }
+
+  .terms-label {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .terms-link {
+    font-size: 13px;
   }
 }
 
