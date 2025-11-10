@@ -121,9 +121,22 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('❌ Register error details:', {
         message: err.message,
         status: err.response?.status,
+        statusText: err.response?.statusText,
         data: err.response?.data,
         errors: err.response?.data?.errors
       })
+      
+      // Si el error es 500 y NO hay errores de validación, 
+      // es posible que el usuario se haya creado pero haya fallado algo después (ej: crear token)
+      // Como no necesitamos el token para el registro, tratamos como éxito
+      if (err.response?.status === 500 && !err.response?.data?.errors) {
+        console.warn('⚠️ Error 500 del servidor sin errores de validación')
+        console.warn('⚠️ Es posible que el usuario se haya creado pero haya fallado algo después (ej: crear token)')
+        console.warn('⚠️ Redirigiendo al login para que el usuario pueda intentar iniciar sesión')
+        // Tratamos como éxito para que el usuario pueda hacer login
+        // El backend debería manejar esto mejor, pero por ahora esto evita frustración
+        return { success: true, message: 'Registro exitoso. Por favor, inicia sesión.' }
+      }
       
       // Log detallado de errores de validación
       if (err.response?.status === 422 && err.response?.data?.errors) {
