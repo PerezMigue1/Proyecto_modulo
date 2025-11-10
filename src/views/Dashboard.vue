@@ -64,10 +64,22 @@ const authStore = useAuthStore()
 const user = ref(null)
 
 onMounted(async () => {
+  // Si ya tenemos el usuario del store (después del login), usarlo
+  if (authStore.user) {
+    user.value = authStore.user
+    return
+  }
+  
+  // Si no tenemos el usuario, intentar obtenerlo
   try {
     user.value = await authStore.fetchUser()
   } catch (error) {
-    router.push('/login')
+    console.error('Error al obtener usuario en dashboard:', error)
+    // Solo redirigir si es un error 401 (token inválido)
+    if (error.response?.status === 401) {
+      router.push('/login')
+    }
+    // Para otros errores, mostrar el error pero no redirigir
   }
 })
 

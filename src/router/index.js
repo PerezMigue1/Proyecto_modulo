@@ -54,16 +54,22 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     
-    // Hay token, verificar si tenemos el usuario
+    // Hay token, si no tenemos el usuario, intentar obtenerlo
+    // Pero si ya lo tenemos (por ejemplo, después del login), no hacer la petición
     if (!authStore.user) {
       try {
         // Intentar obtener usuario
         await authStore.fetchUser()
       } catch (error) {
-        // Si falla, limpiar auth y redirigir al login
-        authStore.clearAuth()
-        next('/login')
-        return
+        console.error('Error al obtener usuario:', error)
+        // Si es un error 401 (token inválido), limpiar auth y redirigir
+        if (error.response?.status === 401) {
+          authStore.clearAuth()
+          next('/login')
+          return
+        }
+        // Para otros errores, permitir acceso pero el componente Dashboard manejará el error
+        // Esto evita que el usuario sea sacado inmediatamente después del login
       }
     }
     
@@ -72,13 +78,13 @@ router.beforeEach(async (to, from, next) => {
   } 
   // Si la ruta requiere que el usuario NO esté autenticado
   else if (to.meta.requiresGuest) {
-    if (token) {
-      // Ya está autenticado, redirigir al dashboard
+    if (token && authStore.user) {
+      // Ya está autenticado y tiene usuario, redirigir al dashboard
       next('/dashboard')
       return
     }
     
-    // No está autenticado, permitir acceso
+    // No está autenticado o no tiene usuario, permitir acceso
     next()
   } 
   // Ruta pública, permitir acceso
