@@ -23,62 +23,69 @@ onMounted(async () => {
   const error = route.query.error
   const provider = route.query.provider
 
-  console.log('🔍 AuthCallback mounted:', { token: token ? 'Presente' : 'No presente', error, provider })
+  console.log('🔍 AuthCallback mounted')
+  console.log('🔍 Token:', token ? 'Presente' : 'No presente')
+  console.log('🔍 Error:', error)
+  console.log('🔍 Provider:', provider)
+  console.log('🔍 Query params completos:', route.query)
 
+  // Si hay error en la URL, redirigir al login con el error
   if (error) {
-    // Si hay error en la URL, redirigir al login con el error
     console.error('❌ Error en callback:', error)
-    router.push(`/login?error=${encodeURIComponent(error)}`)
+    const errorMessage = decodeURIComponent(error)
+    console.error('❌ Mensaje de error decodificado:', errorMessage)
+    router.push(`/login?error=${encodeURIComponent(errorMessage)}`)
     return
   }
 
-  if (token) {
-    try {
-      console.log('✅ Token recibido, guardando en store...')
-      // Set token primero
-      authStore.setAuth(null, token)
-      console.log('✅ Token guardado en store')
-      
-      // Intentar obtener usuario, pero si falla, no es crítico
-      // El token ya está guardado y el router guard permitirá el acceso
-      try {
-        console.log('🔄 Intentando obtener usuario...')
-        await authStore.fetchUser()
-        console.log('✅ Usuario obtenido exitosamente')
-      } catch (fetchError) {
-        console.warn('⚠️ No se pudo obtener el usuario, pero el token está guardado:', fetchError)
-        // No es crítico, el token está guardado y el usuario puede acceder
-        // El dashboard intentará obtener el usuario nuevamente
-      }
-      
-      // Redirigir al dashboard
-      console.log('✅ Redirigiendo al dashboard...')
-      await router.push('/dashboard')
-    } catch (err) {
-      console.error('❌ Error en callback:', err)
-      console.error('❌ Error details:', {
-        message: err.message,
-        response: err.response,
-        status: err.response?.status
-      })
-      
-      // Solo limpiar auth si es un error crítico
-      // Si el token está presente, intentar usarlo de todas formas
-      if (err.response?.status === 401) {
-        // Token inválido, limpiar auth
-        authStore.clearAuth()
-        router.push('/login?error=' + encodeURIComponent('Token inválido. Por favor, intenta de nuevo.'))
-      } else {
-        // Otro error, pero el token puede ser válido
-        // Intentar redirigir al dashboard de todas formas
-        console.warn('⚠️ Error no crítico, intentando redirigir al dashboard...')
-        await router.push('/dashboard')
-      }
-    }
-  } else {
-    // No hay token, redirigir al login
+  // Si no hay token, redirigir al login con error
+  if (!token) {
     console.error('❌ No se recibió el token de autenticación')
-    router.push('/login?error=' + encodeURIComponent('No se recibió el token de autenticación.'))
+    console.error('❌ Query params:', route.query)
+    router.push('/login?error=' + encodeURIComponent('No se recibió el token de autenticación. Por favor, intenta de nuevo.'))
+    return
+  }
+
+  // Tenemos token, procesarlo
+  try {
+    console.log('✅ Token recibido de OAuth, guardando en store...')
+    console.log('✅ Provider:', provider)
+    console.log('✅ Token (primeros 20 caracteres):', token.substring(0, 20) + '...')
+    
+    // Guardar token en store primero
+    authStore.setAuth(null, token)
+    console.log('✅ Token guardado en store y localStorage')
+    console.log('✅ Token en store:', authStore.token ? 'Presente' : 'No presente')
+    
+    // Intentar obtener usuario del backend (opcional, no bloquea la redirección)
+    try {
+      console.log('🔄 Intentando obtener usuario del backend...')
+      await authStore.fetchUser()
+      console.log('✅ Usuario obtenido exitosamente:', authStore.user?.email)
+    } catch (fetchError) {
+      console.warn('⚠️ No se pudo obtener usuario inmediatamente:', fetchError)
+      console.warn('⚠️ Esto no es crítico, el token está guardado y el dashboard lo obtendrá')
+      // No bloqueamos la redirección si falla obtener el usuario
+      // El dashboard intentará obtenerlo nuevamente
+    }
+    
+    // Redirigir inmediatamente al dashboard
+    // El router guard y el dashboard manejarán el token y el usuario
+    console.log('✅ Redirigiendo al dashboard...')
+    router.push('/dashboard')
+  } catch (err) {
+    console.error('❌ Error crítico en callback:', err)
+    
+    // Solo limpiar auth si es un error crítico real
+    // Si el token está presente, intentar redirigir de todas formas
+    if (!token) {
+      authStore.clearAuth()
+      router.push('/login?error=' + encodeURIComponent('Error al procesar la autenticación. Por favor, intenta de nuevo.'))
+    } else {
+      // El token está presente, intentar redirigir al dashboard
+      console.warn('⚠️ Error no crítico, intentando redirigir al dashboard con token...')
+      router.push('/dashboard')
+    }
   }
 })
 </script>

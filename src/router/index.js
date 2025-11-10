@@ -50,44 +50,50 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
     if (!token) {
       // No hay token, redirigir al login
+      console.log('❌ No hay token, redirigiendo al login')
       next('/login')
       return
     }
     
-    // Hay token, si no tenemos el usuario, intentar obtenerlo
-    // Pero si ya lo tenemos (por ejemplo, después del login), no hacer la petición
+    // Hay token, verificar si tenemos el usuario
+    // Si ya lo tenemos (por ejemplo, después del login o OAuth), no hacer petición
     if (!authStore.user) {
       try {
-        // Intentar obtener usuario
+        console.log('🔄 Obteniendo usuario del backend...')
         await authStore.fetchUser()
+        console.log('✅ Usuario obtenido:', authStore.user?.email)
       } catch (error) {
-        console.error('Error al obtener usuario:', error)
+        console.error('❌ Error al obtener usuario:', error)
         // Si es un error 401 (token inválido), limpiar auth y redirigir
         if (error.response?.status === 401) {
+          console.error('❌ Token inválido (401), limpiando auth...')
           authStore.clearAuth()
           next('/login')
           return
         }
-        // Para otros errores, permitir acceso pero el componente Dashboard manejará el error
-        // Esto evita que el usuario sea sacado inmediatamente después del login
+        // Para otros errores (red, servidor, etc.), permitir acceso
+        // El dashboard intentará obtener el usuario nuevamente
+        console.warn('⚠️ Error al obtener usuario, pero permitiendo acceso al dashboard')
       }
     }
     
-    // Usuario autenticado, permitir acceso
+    // Usuario autenticado (tiene token), permitir acceso
+    console.log('✅ Acceso permitido a ruta protegida')
     next()
   } 
   // Si la ruta requiere que el usuario NO esté autenticado
   else if (to.meta.requiresGuest) {
-    if (token && authStore.user) {
-      // Ya está autenticado y tiene usuario, redirigir al dashboard
+    if (token) {
+      // Ya está autenticado (tiene token), redirigir al dashboard
+      console.log('✅ Usuario autenticado, redirigiendo al dashboard')
       next('/dashboard')
       return
     }
     
-    // No está autenticado o no tiene usuario, permitir acceso
+    // No está autenticado, permitir acceso
     next()
   } 
-  // Ruta pública, permitir acceso
+  // Ruta pública (como /auth/callback), permitir acceso
   else {
     next()
   }
