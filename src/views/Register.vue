@@ -20,6 +20,10 @@
         <span v-else>{{ error }}</span>
       </div>
 
+      <div v-if="errorPreguntas" class="alert alert-warning" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+        ⚠️ {{ errorPreguntas }}
+      </div>
+
       <form @submit.prevent="handleRegister" class="login-form">
         <div class="form-group">
           <label for="name">Nombre completo</label>
@@ -73,12 +77,16 @@
             id="pregunta_secreta"
             v-model="form.pregunta_secreta"
             required
+            :disabled="loadingPreguntas"
           >
-            <option value="">Selecciona una pregunta</option>
-            <option v-for="pregunta in preguntas" :key="pregunta._id" :value="pregunta.pregunta">
+            <option value="">{{ loadingPreguntas ? 'Cargando preguntas...' : 'Selecciona una pregunta' }}</option>
+            <option v-for="pregunta in preguntas" :key="pregunta._id || pregunta.id" :value="pregunta.pregunta">
               {{ pregunta.pregunta }}
             </option>
           </select>
+          <p v-if="!loadingPreguntas && preguntas.length === 0" style="color: #e53e3e; font-size: 14px; margin-top: 5px;">
+            No se pudieron cargar las preguntas secretas. Por favor, recarga la página.
+          </p>
         </div>
 
         <div class="form-group">
@@ -125,6 +133,8 @@ const form = ref({
 const preguntas = ref([])
 const error = ref('')
 const loading = ref(false)
+const loadingPreguntas = ref(true)
+const errorPreguntas = ref('')
 
 onMounted(async () => {
   // Log de información de debug
@@ -132,23 +142,46 @@ onMounted(async () => {
   console.log('🔗 API URL:', import.meta.env.VITE_API_URL)
   console.log('🔗 Environment:', import.meta.env.MODE)
   
+  loadingPreguntas.value = true
+  errorPreguntas.value = ''
+  
   try {
     console.log('📋 Cargando preguntas secretas...')
     const preguntasData = await getSecretQuestions()
     console.log('✅ Preguntas secretas recibidas:', preguntasData)
+    console.log('✅ Tipo de dato:', typeof preguntasData, Array.isArray(preguntasData))
     
-    if (Array.isArray(preguntasData) && preguntasData.length > 0) {
-      preguntas.value = preguntasData
-      console.log('✅ Preguntas secretas cargadas:', preguntas.value.length)
+    if (Array.isArray(preguntasData)) {
+      if (preguntasData.length > 0) {
+        preguntas.value = preguntasData
+        console.log('✅ Preguntas secretas cargadas:', preguntas.value.length)
+        console.log('✅ Primera pregunta:', preguntas.value[0])
+      } else {
+        console.warn('⚠️ El array de preguntas está vacío')
+        errorPreguntas.value = 'No hay preguntas secretas disponibles'
+      }
     } else {
-      console.warn('⚠️ No se recibieron preguntas secretas o el array está vacío')
-      preguntas.value = []
+      console.warn('⚠️ La respuesta no es un array:', preguntasData)
+      errorPreguntas.value = 'Error al cargar las preguntas secretas'
     }
   } catch (err) {
     console.error('❌ Error loading secret questions:', err)
     console.error('❌ Error completo:', JSON.stringify(err, null, 2))
+    console.error('❌ Error response:', err.response)
+    console.error('❌ Error status:', err.response?.status)
+    console.error('❌ Error data:', err.response?.data)
+    
     preguntas.value = []
-    // No mostrar error fatal en UI, solo log para no bloquear el registro
+    
+    if (err.response) {
+      errorPreguntas.value = `Error ${err.response.status}: ${err.response.statusText || 'Error al cargar preguntas'}`
+    } else if (err.request) {
+      errorPreguntas.value = 'No se pudo conectar con el servidor para cargar las preguntas'
+    } else {
+      errorPreguntas.value = 'Error al cargar las preguntas secretas'
+    }
+  } finally {
+    loadingPreguntas.value = false
   }
 })
 
