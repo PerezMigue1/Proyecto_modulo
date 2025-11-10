@@ -115,10 +115,18 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401) {
       // Limpiar token y redirigir al login
+      // Pero NO hacer esto en el callback de OAuth o durante la navegación inicial
+      const isAuthCallback = window.location.pathname === '/auth/callback'
+      const isNavigating = error.config?.url === '/user' && error.config?.method === 'get'
+      
       localStorage.removeItem('token')
-      // Solo redirigir si no estamos ya en la página de login
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.location.href = '/login'
+      
+      // Solo redirigir si no estamos en el callback o en páginas de auth
+      if (!isAuthCallback && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        // Solo redirigir si no estamos en medio de una navegación crítica
+        if (!isNavigating || window.location.pathname === '/dashboard') {
+          window.location.href = '/login'
+        }
       }
     }
     
