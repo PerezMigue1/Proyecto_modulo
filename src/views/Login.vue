@@ -279,10 +279,25 @@ async function handleLogin() {
         } else if (err.request) {
       // Error de red (sin respuesta del servidor)
       const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-equipo.onrender.com/api'
-      error.value = `No se pudo conectar con el servidor. Verifica que el backend esté funcionando en ${apiUrl}`
+      
+      // Determinar el tipo de error de red
+      let errorMessage = 'No se pudo conectar con el servidor.'
+      
+      if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+        errorMessage = 'El servidor está tardando demasiado en responder. Por favor, intenta de nuevo.'
+      } else if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
+        errorMessage = 'Error de conexión de red. Verifica tu conexión a internet.'
+      } else if (err.code === 'ERR_CERT' || err.message.includes('certificate')) {
+        errorMessage = 'Error de certificado SSL. Por favor, contacta al administrador.'
+      } else {
+        errorMessage = `No se pudo conectar con el servidor. Verifica que el backend esté funcionando en ${apiUrl}`
+      }
+      
+      error.value = errorMessage
       console.error('❌ Network error:', err.request)
       console.error('❌ Error code:', err.code)
       console.error('❌ Error message:', err.message)
+      console.error('❌ Full error:', err)
     } else {
       // Otro tipo de error
       error.value = err.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.'
