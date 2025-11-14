@@ -12,7 +12,7 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-onMounted(() => {
+onMounted(async () => {
   // Obtener el token de la query string
   // Vue Router decodifica automáticamente los parámetros de la URL
   // Si el token viene codificado, intentar decodificarlo, pero si ya está decodificado, usarlo tal cual
@@ -62,6 +62,19 @@ onMounted(() => {
     }
     
     console.log('✅ Token verificado correctamente')
+    
+    // Intentar obtener los datos del usuario antes de redirigir
+    // Esto asegura que el nombre aparezca inmediatamente en el dashboard
+    console.log('🔄 Obteniendo datos del usuario...')
+    try {
+      const userData = await authStore.fetchUser()
+      console.log('✅ Usuario obtenido:', userData)
+      // El usuario ya está guardado en el store por fetchUser
+    } catch (userError) {
+      console.warn('⚠️ No se pudo obtener usuario ahora, se intentará en el dashboard:', userError)
+      // Continuar de todas formas - el dashboard intentará obtenerlo
+    }
+    
     console.log('🔄 Redirigiendo al dashboard...')
     
     // Usar window.location.href para forzar recarga completa
@@ -74,7 +87,17 @@ onMounted(() => {
       try {
         localStorage.setItem('token', token)
         authStore.setAuth(null, token)
-        console.log('✅ Token guardado en fallback, redirigiendo...')
+        console.log('✅ Token guardado en fallback')
+        
+        // Intentar obtener usuario
+        try {
+          await authStore.fetchUser()
+          console.log('✅ Usuario obtenido en fallback')
+        } catch (userError) {
+          console.warn('⚠️ No se pudo obtener usuario en fallback:', userError)
+        }
+        
+        console.log('🔄 Redirigiendo al dashboard...')
         window.location.href = '/dashboard'
       } catch (fallbackErr) {
         console.error('❌ Error en fallback:', fallbackErr)

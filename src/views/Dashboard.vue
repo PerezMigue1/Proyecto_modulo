@@ -67,21 +67,47 @@ onMounted(async () => {
   // Si ya tenemos el usuario del store (después del login), usarlo
   if (authStore.user) {
     user.value = authStore.user
+    console.log('✅ Usuario encontrado en store:', authStore.user)
     return
   }
   
   // Intentar obtener usuario de forma asíncrona sin bloquear
   // NO redirigir al login - el usuario está autenticado (tiene token)
-  // Después de OAuth, solo tenemos el token y el dashboard se mostrará
-  authStore.fetchUser()
-    .then(userData => {
-      user.value = userData
+  // Después de OAuth, solo tenemos el token y necesitamos obtener los datos del usuario
+  console.log('🔄 No hay usuario en store, obteniendo del backend...')
+  
+  try {
+    const userData = await authStore.fetchUser()
+    user.value = userData
+    console.log('✅ Usuario obtenido del backend:', userData)
+  } catch (error) {
+    console.error('❌ Error al obtener usuario en dashboard:', error)
+    console.error('❌ Error details:', {
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
     })
-    .catch(error => {
-      console.error('Error al obtener usuario en dashboard:', error)
-      // NO redirigir - el usuario está autenticado con token
-      // El dashboard se mostrará sin datos del usuario si falla
-    })
+    
+    // Si es un error 401, el token es inválido
+    if (error.response?.status === 401) {
+      console.error('❌ Token inválido, redirigiendo al login...')
+      router.push('/login')
+      return
+    }
+    
+    // Para otros errores, mostrar el dashboard sin datos del usuario
+    // pero intentar de nuevo después de un tiempo
+    console.log('⚠️ Mostrando dashboard sin datos del usuario, reintentando en 2 segundos...')
+    setTimeout(async () => {
+      try {
+        const userData = await authStore.fetchUser()
+        user.value = userData
+        console.log('✅ Usuario obtenido en segundo intento:', userData)
+      } catch (retryError) {
+        console.error('❌ Error en segundo intento:', retryError)
+      }
+    }, 2000)
+  }
 })
 
 async function handleLogout() {
