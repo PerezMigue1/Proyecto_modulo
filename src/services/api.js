@@ -29,12 +29,29 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+      // Log detallado del token para debugging
+      if (config.url === '/user') {
+        console.log('🔑 Token para /user:', {
+          length: token.length,
+          first20: token.substring(0, 20),
+          last20: token.substring(token.length - 20),
+          hasSpaces: token.includes(' '),
+          hasNewlines: token.includes('\n'),
+          encoded: encodeURIComponent(token).substring(0, 50)
+        })
+        console.log('🔑 Header Authorization completo:', config.headers.Authorization.substring(0, 50) + '...')
+      }
+    } else {
+      if (config.url === '/user') {
+        console.error('❌ No hay token disponible para /user')
+      }
     }
     
     // Log para debugging (siempre visible en desarrollo, también en producción para debugging)
     console.log('📤 Request:', config.method?.toUpperCase(), config.url, {
       baseURL: config.baseURL,
-      data: config.data
+      data: config.data,
+      hasAuth: !!config.headers.Authorization
     })
     
     return config
