@@ -50,26 +50,45 @@ onMounted(async () => {
   try {
     console.log('✅ Token recibido de OAuth, guardando en store...')
     
-    // Guardar token en store y localStorage
+    // Guardar token en store y localStorage PRIMERO
     authStore.setAuth(null, token)
     
-    // Verificar que el token se guardó correctamente
-    if (!authStore.token) {
-      console.error('❌ Error: El token no se guardó en el store')
+    // Esperar un momento para asegurar que el token se guardó completamente
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Verificar que el token se guardó correctamente en ambos lugares
+    const tokenInStore = authStore.token
+    const tokenInLocalStorage = localStorage.getItem('token')
+    
+    console.log('🔍 Verificación de token:', {
+      tokenInStore: tokenInStore ? 'Presente' : 'No presente',
+      tokenInLocalStorage: tokenInLocalStorage ? 'Presente' : 'No presente',
+      tokensMatch: tokenInStore === tokenInLocalStorage
+    })
+    
+    if (!tokenInStore || !tokenInLocalStorage || tokenInStore !== token) {
+      console.error('❌ Error: El token no se guardó correctamente')
+      console.error('❌ Token en store:', tokenInStore)
+      console.error('❌ Token en localStorage:', tokenInLocalStorage)
+      console.error('❌ Token original:', token)
       router.push('/login?error=' + encodeURIComponent('Error al guardar el token. Por favor, intenta de nuevo.'))
       return
     }
     
-    // Redirigir inmediatamente al dashboard sin ninguna verificación adicional
-    // El token es suficiente para autenticación, no se requiere obtener usuario aquí
-    router.push('/dashboard')
+    console.log('✅ Token guardado correctamente, redirigiendo al dashboard...')
+    
+    // Usar window.location.href para forzar una recarga completa
+    // Esto asegura que el router guard vea el token en localStorage
+    window.location.href = '/dashboard'
   } catch (err) {
     console.error('❌ Error en callback:', err)
     
-    // Si hay token, guardarlo y redirigir de todas formas
+    // Si hay token, intentar guardarlo y redirigir de todas formas
     if (token) {
+      console.warn('⚠️ Error no crítico, intentando guardar token y redirigir...')
       authStore.setAuth(null, token)
-      router.push('/dashboard')
+      await new Promise(resolve => setTimeout(resolve, 200))
+      window.location.href = '/dashboard'
     } else {
       authStore.clearAuth()
       router.push('/login?error=' + encodeURIComponent('Error al procesar la autenticación. Por favor, intenta de nuevo.'))

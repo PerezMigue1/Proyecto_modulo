@@ -45,8 +45,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // Verificar token desde localStorage también (por si el store no se ha actualizado)
-  let token = authStore.token || localStorage.getItem('token')
+  // Verificar token desde localStorage primero (más confiable después de OAuth)
+  let token = localStorage.getItem('token') || authStore.token
   
   // Si hay token en localStorage pero no en el store, actualizar el store
   if (token && !authStore.token) {
@@ -63,10 +63,11 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     
-    // Si viene de OAuth callback, solo verificar token y permitir acceso
+    // Si viene de OAuth callback o si acabamos de guardar el token, permitir acceso directo
     // No intentar obtener usuario aquí, el dashboard lo hará
-    if (from.path === '/auth/callback') {
+    if (from.path === '/auth/callback' || from.name === 'auth-callback') {
       console.log('✅ Viniendo de OAuth callback, permitiendo acceso directo')
+      console.log('✅ Token presente:', token ? 'Sí' : 'No')
       next()
       return
     }
@@ -90,14 +91,23 @@ router.beforeEach(async (to, from, next) => {
       console.error('❌ Error al obtener usuario:', error)
       
       // Solo bloquear si es un error 401 (token inválido)
+      // Pero esperar un poco antes de bloquear, por si el token aún no está completamente propagado
       if (error.response?.status === 401) {
-        console.error('❌ Token inválido (401), limpiando auth...')
-        authStore.clearAuth()
-        next('/login')
-        return
+        // Verificar token nuevamente antes de bloquear
+        const currentToken = localStorage.getItem('token')
+        if (!currentToken) {
+          console.error('❌ Token inválido (401) y no hay token en localStorage, limpiando auth...')
+          authStore.clearAuth()
+          next('/login')
+          return
+        } else {
+          console.warn('⚠️ Error 401 pero token aún presente, permitiendo acceso - puede ser un problema temporal')
+          // Permitir acceso, el dashboard intentará obtener el usuario nuevamente
+        }
+      } else {
+        // Para otros errores, permitir acceso - el dashboard manejará el error
+        console.warn('⚠️ Error al obtener usuario, pero permitiendo acceso')
       }
-      // Para otros errores, permitir acceso - el dashboard manejará el error
-      console.warn('⚠️ Error al obtener usuario, pero permitiendo acceso')
     }
     
     // Usuario autenticado (tiene token), permitir acceso

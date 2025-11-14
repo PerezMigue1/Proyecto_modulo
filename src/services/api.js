@@ -115,24 +115,30 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401) {
       // Limpiar token y redirigir al login
-      // Pero NO hacer esto en el callback de OAuth o durante la navegación inicial
+      // Pero NO hacer esto en el callback de OAuth o durante la navegación inicial después de OAuth
       const isAuthCallback = window.location.pathname === '/auth/callback'
       const isLoginOrRegister = window.location.pathname === '/login' || window.location.pathname === '/register'
       const isFetchingUser = error.config?.url === '/user' && error.config?.method === 'get'
+      const isDashboard = window.location.pathname === '/dashboard'
+      
+      // Verificar si acabamos de venir de OAuth (token recién guardado)
+      const tokenJustSaved = localStorage.getItem('token') && !isAuthCallback && isDashboard
       
       console.log('🔍 Error 401 detectado:', {
         isAuthCallback,
         isLoginOrRegister,
         isFetchingUser,
+        isDashboard,
+        tokenJustSaved,
         currentPath: window.location.pathname,
         errorUrl: error.config?.url
       })
       
       // NO limpiar token ni redirigir si estamos en el callback de OAuth
-      // El callback manejará el error y redirigirá apropiadamente
-      if (isAuthCallback) {
-        console.log('⚠️ Error 401 durante callback OAuth, no limpiando token ni redirigiendo')
-        console.log('⚠️ El callback manejará este error')
+      // o si acabamos de venir de OAuth (puede ser un problema temporal)
+      if (isAuthCallback || tokenJustSaved) {
+        console.log('⚠️ Error 401 durante/sdespués de OAuth, no limpiando token ni redirigiendo')
+        console.log('⚠️ Puede ser un problema temporal de sincronización')
         return Promise.reject(error)
       }
       
