@@ -168,7 +168,7 @@ Los archivos se generarán en `dist/`
 - **Despliegue Frontend**: Netlify
 - **Despliegue Backend**: Render
 - **Comunicación**: APIs REST
-- **Autenticación**: Tokens (Sanctum)
+- **Autenticación**: Tokens JWT (tymon/jwt-auth)
 
 ## ✅ Verificación
 

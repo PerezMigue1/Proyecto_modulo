@@ -46,17 +46,19 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
   // Verificar token desde localStorage primero (más confiable después de OAuth)
-  let token = localStorage.getItem('token') || authStore.token
-  
-  // Detectar si acabamos de venir de OAuth (token en localStorage pero no en store)
-  // Esto indica que el token fue guardado recientemente por AuthCallback
-  const isFromOAuth = token && !authStore.token
+  // Siempre leer de localStorage primero porque es la fuente de verdad
+  let token = localStorage.getItem('token')
   
   // Si hay token en localStorage pero no en el store, actualizar el store
   if (token && !authStore.token) {
     console.log('🔄 Token encontrado en localStorage, actualizando store...')
-    console.log('✅ Detectado flujo de OAuth - acceso inmediato sin verificaciones')
     authStore.setAuth(null, token)
+  }
+  
+  // Si no hay token en localStorage pero hay en el store, limpiar el store
+  if (!token && authStore.token) {
+    console.log('🔄 No hay token en localStorage, limpiando store...')
+    authStore.clearAuth()
   }
 
   // Si la ruta requiere autenticación
@@ -64,30 +66,19 @@ router.beforeEach(async (to, from, next) => {
     if (!token) {
       // No hay token, redirigir al login
       console.log('❌ No hay token, redirigiendo al login')
+      console.log('❌ Ruta actual:', to.path)
       next('/login')
       return
     }
     
-    // Si viene de OAuth callback O si detectamos flujo de OAuth (token recién guardado)
-    // O si estamos navegando al dashboard desde el callback
-    // permitir acceso INMEDIATO sin ninguna verificación
-    // NO intentar obtener usuario, NO verificar nada - solo el token es suficiente
-    const comingFromCallback = from.path === '/auth/callback' || from.name === 'auth-callback'
-    const goingToDashboard = to.path === '/dashboard' && comingFromCallback
-    const hasTokenFromOAuth = isFromOAuth || (token && comingFromCallback)
-    
-    if (comingFromCallback || goingToDashboard || hasTokenFromOAuth) {
-      console.log('✅ Viniendo de OAuth - acceso inmediato sin verificaciones')
-      console.log('✅ Token presente:', token ? 'Sí' : 'No')
-      console.log('✅ From:', from.path, 'To:', to.path)
-      next()
-      return
-    }
-    
-    // Para otras rutas, verificar token y permitir acceso
-    // NO intentar obtener usuario aquí - el dashboard lo hará si es necesario
-    console.log('✅ Token encontrado, permitiendo acceso')
+    // Si hay token, permitir acceso inmediato
+    // NO verificar nada más - el token es suficiente
+    // El dashboard se encargará de obtener los datos del usuario si es necesario
+    console.log('✅ Token encontrado, permitiendo acceso al dashboard')
+    console.log('✅ Token:', token.substring(0, 20) + '...')
+    console.log('✅ From:', from.path, 'To:', to.path)
     next()
+    return
   } 
   // Si la ruta requiere que el usuario NO esté autenticado
   else if (to.meta.requiresGuest) {
