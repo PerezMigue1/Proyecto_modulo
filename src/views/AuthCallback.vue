@@ -13,9 +13,20 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 onMounted(() => {
-  // Decodificar el token por si viene codificado en la URL
-  // Vue Router normalmente lo decodifica automáticamente, pero es mejor ser explícito
-  const token = route.query.token ? decodeURIComponent(route.query.token) : null
+  // Obtener el token de la query string
+  // Vue Router decodifica automáticamente los parámetros de la URL
+  // Si el token viene codificado, intentar decodificarlo, pero si ya está decodificado, usarlo tal cual
+  let token = route.query.token || null
+  
+  // Si el token existe pero parece estar codificado (contiene %), decodificarlo
+  if (token && typeof token === 'string' && token.includes('%')) {
+    try {
+      token = decodeURIComponent(token)
+    } catch (e) {
+      console.warn('⚠️ Error al decodificar token, usando tal cual:', e)
+    }
+  }
+  
   const error = route.query.error
 
   // Procesar inmediatamente sin esperas ni pantallas intermedias
