@@ -153,12 +153,17 @@ export const useAuthStore = defineStore('auth', () => {
       console.log('✅ Respuesta del registro:', response.status, response.data)
       
       // Verificar que el registro fue exitoso (status 201 o 200)
-      // Aceptar cualquier respuesta exitosa, incluso si no incluye token
+      // El backend ahora devuelve un mensaje indicando que se envió el código OTP
       if (response.status === 201 || response.status === 200) {
         console.log('✅ Registro exitoso - Usuario creado en la base de datos')
+        console.log('✅ Mensaje del servidor:', response.data?.message)
         // NO establecer autenticación automática después del registro
-        // El usuario debe hacer login manualmente
-        return { success: true, message: 'Registro exitoso' }
+        // El usuario debe verificar el código OTP primero
+        return { 
+          success: true, 
+          message: response.data?.message || 'Registro exitoso. Verifica tu correo para activar tu cuenta.',
+          email: response.data?.email || null
+        }
       } else {
         console.error('❌ Status code inesperado:', response.status)
         throw new Error('Respuesta inválida del servidor')

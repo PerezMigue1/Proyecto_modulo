@@ -34,6 +34,18 @@ const routes = [
     path: '/auth/callback',
     name: 'auth-callback',
     component: () => import('@/views/AuthCallback.vue')
+  },
+  {
+    path: '/verify-otp',
+    name: 'verify-otp',
+    component: () => import('@/views/VerifyOTP.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/password/update',
+    name: 'password-update',
+    component: () => import('@/views/PasswordUpdate.vue'),
+    meta: { requiresGuest: true }
   }
 ]
 

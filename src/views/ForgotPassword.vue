@@ -3,8 +3,9 @@
     <div class="login-card">
       <div class="login-header">
         <h1>Recuperar Contraseña</h1>
-        <p v-if="!step || step === 1">Ingresa tu correo electrónico</p>
-        <p v-else-if="step === 2">Responde tu pregunta secreta</p>
+        <p v-if="!step || step === 1">Elige un método de recuperación</p>
+        <p v-else-if="step === 2 && recoveryMethod === 'pregunta'">Responde tu pregunta secreta</p>
+        <p v-else-if="step === 2 && recoveryMethod === 'otp'">Ingresa el código enviado a tu correo</p>
         <p v-else-if="step === 3">Ingresa tu nueva contraseña</p>
       </div>
 
@@ -12,7 +13,11 @@
         {{ error }}
       </div>
 
-      <!-- Step 1: Email verification -->
+      <div v-if="success" class="alert alert-success">
+        {{ success }}
+      </div>
+
+      <!-- Step 1: Choose method and email -->
       <form v-if="step === 1" @submit.prevent="handleVerifyEmail" class="login-form">
         <div class="form-group">
           <label for="email">Correo electrónico</label>
@@ -25,7 +30,37 @@
           />
         </div>
 
-        <button type="submit" class="btn-primary" :disabled="loading">
+        <div class="form-group">
+          <label>Método de recuperación</label>
+          <div class="method-selection">
+            <label class="method-option">
+              <input
+                type="radio"
+                v-model="recoveryMethod"
+                value="pregunta"
+                name="recoveryMethod"
+              />
+              <div class="method-card">
+                <strong>Pregunta Secreta</strong>
+                <small>Responde tu pregunta secreta configurada</small>
+              </div>
+            </label>
+            <label class="method-option">
+              <input
+                type="radio"
+                v-model="recoveryMethod"
+                value="otp"
+                name="recoveryMethod"
+              />
+              <div class="method-card">
+                <strong>Código por Email</strong>
+                <small>Recibe un código de 6 dígitos en tu correo</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" :disabled="loading || !recoveryMethod">
           {{ loading ? 'Verificando...' : 'Continuar' }}
         </button>
 
@@ -34,8 +69,8 @@
         </div>
       </form>
 
-      <!-- Step 2: Secret question -->
-      <form v-if="step === 2" @submit.prevent="handleVerifyAnswer" class="login-form">
+      <!-- Step 2: Secret question or OTP -->
+      <form v-if="step === 2 && recoveryMethod === 'pregunta'" @submit.prevent="handleVerifyAnswer" class="login-form">
         <div class="form-group">
           <label>Pregunta secreta</label>
           <p style="color: #718096; font-size: 14px; margin-bottom: 10px;">{{ preguntaSecreta }}</p>
@@ -60,6 +95,11 @@
           <a @click="step = 1" class="link" style="cursor: pointer;">Volver atrás</a>
         </div>
       </form>
+
+      <!-- Step 2: OTP verification (redirects to VerifyOTP component) -->
+      <div v-if="step === 2 && recoveryMethod === 'otp'" class="login-form">
+        <p>Redirigiendo a verificación de código...</p>
+      </div>
 
       <!-- Step 3: New password -->
       <form v-if="step === 3" @submit.prevent="handleUpdatePassword" class="login-form">
@@ -134,11 +174,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { verifyEmail, verifyAnswer, updatePassword } from '@/services/passwordRecovery'
 
 const router = useRouter()
+const route = useRoute()
 
 const step = ref(1)
 const form = ref({
@@ -149,21 +190,48 @@ const form = ref({
 })
 const preguntaSecreta = ref('')
 const error = ref('')
+const success = ref('')
 const loading = ref(false)
 const respuestaSecreta = ref('')
+const otpCode = ref('')
+const recoveryMethod = ref('pregunta') // 'pregunta' o 'otp'
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 
+// Verificar si venimos de verificación OTP
+onMounted(() => {
+  if (route.query.email && route.query.method === 'otp' && route.query.otp_code) {
+    form.value.email = route.query.email
+    otpCode.value = route.query.otp_code
+    recoveryMethod.value = 'otp'
+    step.value = 3 // Ir directo al paso de actualizar contraseña
+  }
+})
+
 async function handleVerifyEmail() {
   error.value = ''
+  success.value = ''
   loading.value = true
 
   try {
-    const response = await verifyEmail(form.value.email)
-    preguntaSecreta.value = response.pregunta_secreta
-    step.value = 2
+    const response = await verifyEmail(form.value.email, recoveryMethod.value)
+    
+    if (recoveryMethod.value === 'otp') {
+      // Redirigir a verificación OTP
+      router.push({
+        path: '/verify-otp',
+        query: {
+          email: form.value.email,
+          purpose: 'password-recovery'
+        }
+      })
+    } else {
+      // Método de pregunta secreta
+      preguntaSecreta.value = response.pregunta_secreta
+      step.value = 2
+    }
   } catch (err) {
-    error.value = err.response?.data?.errors?.email?.[0] || 'Error al verificar el correo electrónico.'
+    error.value = err.response?.data?.errors?.email?.[0] || err.response?.data?.message || 'Error al verificar el correo electrónico.'
   } finally {
     loading.value = false
   }
@@ -199,7 +267,9 @@ async function handleUpdatePassword() {
       form.value.email,
       form.value.new_password,
       form.value.new_password_confirmation,
-      respuestaSecreta.value
+      respuestaSecreta.value,
+      recoveryMethod.value,
+      otpCode.value
     )
     router.push('/login?status=Contraseña actualizada exitosamente. Ahora puedes iniciar sesión.')
   } catch (err) {
@@ -212,6 +282,52 @@ async function handleUpdatePassword() {
 
 <style scoped>
 @import '@/assets/auth.css';
+
+.method-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.method-option {
+  display: block;
+  cursor: pointer;
+}
+
+.method-option input[type="radio"] {
+  display: none;
+}
+
+.method-card {
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+  background: white;
+}
+
+.method-option input[type="radio"]:checked + .method-card {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.method-card strong {
+  display: block;
+  color: #1a202c;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.method-card small {
+  display: block;
+  color: #718096;
+  font-size: 14px;
+}
+
+.method-option:hover .method-card {
+  border-color: #cbd5e0;
+}
 
 .password-input-wrapper {
   position: relative;

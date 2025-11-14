@@ -579,9 +579,19 @@ async function handleRegister() {
     
     const response = await authStore.register(registerData)
     
-    console.log('✅ Registro exitoso, redirigiendo a login...')
-    // Registro exitoso, redirigir al login con mensaje de éxito
-    await router.push('/login?status=registro-exitoso')
+    console.log('✅ Registro exitoso, redirigiendo a verificación OTP...')
+    
+    // Guardar email en localStorage para el siguiente paso
+    localStorage.setItem('pending_verification_email', form.value.email.trim())
+    
+    // Redirigir a verificación OTP
+    await router.push({
+      path: '/verify-otp',
+      query: {
+        email: form.value.email.trim(),
+        purpose: 'activation'
+      }
+    })
   } catch (err) {
     console.error('❌ Error en registro:', err)
     console.error('❌ Error completo:', JSON.stringify(err, null, 2))

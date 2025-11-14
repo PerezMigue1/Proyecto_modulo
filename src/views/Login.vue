@@ -234,6 +234,30 @@ async function handleLogin() {
             return message
           }
           
+          // Manejar error 403 (cuenta no activada)
+          if (status === 403) {
+            console.error('❌ Error 403: Cuenta no activada')
+            const userEmail = errorData?.email || form.value.email
+            
+            // Guardar email en localStorage para verificación OTP
+            if (userEmail) {
+              localStorage.setItem('pending_verification_email', userEmail)
+            }
+            
+            // Redirigir a verificación OTP
+            router.push({
+              path: '/verify-otp',
+              query: {
+                email: userEmail,
+                purpose: 'activation'
+              }
+            })
+            
+            // Mostrar mensaje temporal
+            error.value = errorData?.message || 'Tu cuenta no está activada. Redirigiendo a verificación...'
+            return
+          }
+          
           // Manejar error 500 específicamente
           if (status === 500) {
             console.error('❌ Error 500: Error interno del servidor')
