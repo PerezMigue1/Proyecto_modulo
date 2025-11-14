@@ -49,16 +49,27 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUser() {
-    if (!token.value) {
+    // Verificar token en store primero, luego en localStorage
+    let currentToken = token.value || localStorage.getItem('token')
+    
+    if (!currentToken) {
       console.error('❌ No hay token para obtener usuario')
       throw new Error('No hay token de autenticación')
+    }
+    
+    // Si el token está en localStorage pero no en el store, sincronizar
+    if (!token.value && currentToken) {
+      console.log('🔄 Token encontrado en localStorage, sincronizando con store...')
+      token.value = currentToken
+      api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`
     }
 
     try {
       loading.value = true
       error.value = null
       console.log('🔄 Obteniendo usuario del backend...')
-      console.log('🔄 Token usado:', token.value.substring(0, 20) + '...')
+      console.log('🔄 Token usado:', currentToken.substring(0, 20) + '...')
+      console.log('🔄 URL completa:', api.defaults.baseURL + '/user')
       
       const response = await api.get('/user')
       console.log('✅ Usuario obtenido:', response.data)
@@ -70,6 +81,8 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('❌ Error response:', err.response)
       console.error('❌ Error status:', err.response?.status)
       console.error('❌ Error data:', err.response?.data)
+      console.error('❌ Request config:', err.config)
+      console.error('❌ Token en header:', err.config?.headers?.Authorization ? 'Presente' : 'No presente')
       
       // Si es un error 401, limpiar auth
       if (err.response?.status === 401) {

@@ -64,6 +64,13 @@ const authStore = useAuthStore()
 const user = ref(null)
 
 onMounted(async () => {
+  // Asegurar que el token del store esté sincronizado con localStorage
+  const tokenFromStorage = localStorage.getItem('token')
+  if (tokenFromStorage && !authStore.token) {
+    console.log('🔄 Sincronizando token desde localStorage al store...')
+    authStore.setAuth(null, tokenFromStorage)
+  }
+  
   // Si ya tenemos el usuario del store (después del login), usarlo
   if (authStore.user) {
     user.value = authStore.user
@@ -71,57 +78,59 @@ onMounted(async () => {
     return
   }
   
+  // Verificar que tenemos token antes de intentar obtener usuario
+  if (!authStore.token && !tokenFromStorage) {
+    console.error('❌ No hay token disponible')
+    router.push('/login')
+    return
+  }
+  
   // Intentar obtener usuario de forma asíncrona sin bloquear
   // NO redirigir al login - el usuario está autenticado (tiene token)
   // Después de OAuth, solo tenemos el token y necesitamos obtener los datos del usuario
   console.log('🔄 No hay usuario en store, obteniendo del backend...')
+  console.log('🔄 Token disponible:', authStore.token ? 'Sí (en store)' : tokenFromStorage ? 'Sí (en localStorage)' : 'No')
   
-  try {
-    const userData = await authStore.fetchUser()
-    user.value = userData
-    console.log('✅ Usuario obtenido del backend:', userData)
-  } catch (error) {
-    console.error('❌ Error al obtener usuario en dashboard:', error)
-    console.error('❌ Error details:', {
-      status: error.response?.status,
-      message: error.message,
-      data: error.response?.data
-    })
-    
-    // NO redirigir al login inmediatamente - puede ser un problema temporal
-    // Especialmente después de OAuth, el token puede necesitar un momento para ser válido
-    // Solo redirigir si el error persiste después de varios intentos
-    
-    // Intentar de nuevo después de un tiempo
-    console.log('⚠️ Mostrando dashboard sin datos del usuario, reintentando en 2 segundos...')
+  // Función para intentar obtener usuario
+  const attemptFetchUser = async (attemptNumber = 1) => {
+    try {
+      console.log(`🔄 Intento ${attemptNumber} de obtener usuario...`)
+      const userData = await authStore.fetchUser()
+      user.value = userData
+      console.log('✅ Usuario obtenido del backend:', userData)
+      return true
+    } catch (error) {
+      console.error(`❌ Error en intento ${attemptNumber}:`, error)
+      console.error('❌ Error details:', {
+        status: error.response?.status,
+        message: error.message,
+        data: error.response?.data,
+        hasToken: !!authStore.token
+      })
+      return false
+    }
+  }
+  
+  // Primer intento inmediato
+  const success = await attemptFetchUser(1)
+  
+  if (!success) {
+    // Segundo intento después de 1 segundo
+    console.log('⚠️ Primer intento falló, reintentando en 1 segundo...')
     setTimeout(async () => {
-      try {
-        const userData = await authStore.fetchUser()
-        user.value = userData
-        console.log('✅ Usuario obtenido en segundo intento:', userData)
-      } catch (retryError) {
-        console.error('❌ Error en segundo intento:', retryError)
-        
-        // Solo después del segundo intento fallido, verificar si es 401
-        // y esperar un poco más antes de redirigir
-        if (retryError.response?.status === 401) {
-          console.log('⚠️ Error 401 en segundo intento, esperando 3 segundos más...')
-          setTimeout(async () => {
-            try {
-              const userData = await authStore.fetchUser()
-              user.value = userData
-              console.log('✅ Usuario obtenido en tercer intento:', userData)
-            } catch (finalError) {
-              // Solo después de 3 intentos fallidos, considerar el token inválido
-              if (finalError.response?.status === 401) {
-                console.error('❌ Token inválido después de 3 intentos, redirigiendo al login...')
-                router.push('/login')
-              }
-            }
-          }, 3000)
-        }
+      const success2 = await attemptFetchUser(2)
+      if (!success2) {
+        // Tercer intento después de 2 segundos más
+        console.log('⚠️ Segundo intento falló, reintentando en 2 segundos más...')
+        setTimeout(async () => {
+          const success3 = await attemptFetchUser(3)
+          if (!success3) {
+            console.error('❌ No se pudo obtener usuario después de 3 intentos')
+            // No redirigir - mostrar dashboard sin nombre pero funcional
+          }
+        }, 2000)
       }
-    }, 2000)
+    }, 1000)
   }
 })
 
