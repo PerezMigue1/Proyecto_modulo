@@ -122,6 +122,7 @@ api.interceptors.response.use(
       const isDashboard = window.location.pathname === '/dashboard'
       
       // Verificar si acabamos de venir de OAuth (token recién guardado)
+      // Si estamos en el dashboard y hay token, probablemente venimos de OAuth
       const tokenJustSaved = localStorage.getItem('token') && !isAuthCallback && isDashboard
       
       console.log('🔍 Error 401 detectado:', {
@@ -131,17 +132,21 @@ api.interceptors.response.use(
         isDashboard,
         tokenJustSaved,
         currentPath: window.location.pathname,
-        errorUrl: error.config?.url
+        errorUrl: error.config?.url,
+        hasToken: !!localStorage.getItem('token')
       })
       
-      // NO limpiar token ni redirigir si estamos en el callback de OAuth
-      // o si acabamos de venir de OAuth (puede ser un problema temporal)
-      if (isAuthCallback || tokenJustSaved) {
+      // NO limpiar token ni redirigir si:
+      // 1. Estamos en el callback de OAuth
+      // 2. Estamos en el dashboard con token (probablemente venimos de OAuth)
+      // 3. Estamos intentando obtener el usuario (puede ser un problema temporal)
+      if (isAuthCallback || (isDashboard && tokenJustSaved) || isFetchingUser) {
         console.log('⚠️ Error 401 durante/sdespués de OAuth, no limpiando token ni redirigiendo')
         console.log('⚠️ Puede ser un problema temporal de sincronización')
         return Promise.reject(error)
       }
       
+      // Solo limpiar token si no es un caso de OAuth
       localStorage.removeItem('token')
       
       // Solo redirigir si no estamos en el callback o en páginas de auth

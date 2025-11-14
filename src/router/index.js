@@ -48,9 +48,14 @@ router.beforeEach(async (to, from, next) => {
   // Verificar token desde localStorage primero (más confiable después de OAuth)
   let token = localStorage.getItem('token') || authStore.token
   
+  // Detectar si acabamos de venir de OAuth (token en localStorage pero no en store)
+  // Esto indica que el token fue guardado recientemente por AuthCallback
+  const isFromOAuth = token && !authStore.token
+  
   // Si hay token en localStorage pero no en el store, actualizar el store
   if (token && !authStore.token) {
     console.log('🔄 Token encontrado en localStorage, actualizando store...')
+    console.log('✅ Detectado flujo de OAuth - acceso inmediato sin verificaciones')
     authStore.setAuth(null, token)
   }
 
@@ -63,10 +68,12 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     
-    // Si viene de OAuth callback, permitir acceso INMEDIATO sin ninguna verificación
+    // Si viene de OAuth callback O si detectamos flujo de OAuth (token recién guardado)
+    // permitir acceso INMEDIATO sin ninguna verificación
     // NO intentar obtener usuario, NO verificar nada - solo el token es suficiente
-    if (from.path === '/auth/callback' || from.name === 'auth-callback') {
-      console.log('✅ Viniendo de OAuth callback - acceso inmediato sin verificaciones')
+    if (from.path === '/auth/callback' || from.name === 'auth-callback' || isFromOAuth) {
+      console.log('✅ Viniendo de OAuth - acceso inmediato sin verificaciones')
+      console.log('✅ Token presente:', token ? 'Sí' : 'No')
       next()
       return
     }
