@@ -69,11 +69,17 @@ router.beforeEach(async (to, from, next) => {
     }
     
     // Si viene de OAuth callback O si detectamos flujo de OAuth (token recién guardado)
+    // O si estamos navegando al dashboard desde el callback
     // permitir acceso INMEDIATO sin ninguna verificación
     // NO intentar obtener usuario, NO verificar nada - solo el token es suficiente
-    if (from.path === '/auth/callback' || from.name === 'auth-callback' || isFromOAuth) {
+    const comingFromCallback = from.path === '/auth/callback' || from.name === 'auth-callback'
+    const goingToDashboard = to.path === '/dashboard' && comingFromCallback
+    const hasTokenFromOAuth = isFromOAuth || (token && comingFromCallback)
+    
+    if (comingFromCallback || goingToDashboard || hasTokenFromOAuth) {
       console.log('✅ Viniendo de OAuth - acceso inmediato sin verificaciones')
       console.log('✅ Token presente:', token ? 'Sí' : 'No')
+      console.log('✅ From:', from.path, 'To:', to.path)
       next()
       return
     }

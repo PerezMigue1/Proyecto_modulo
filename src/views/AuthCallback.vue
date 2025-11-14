@@ -47,11 +47,11 @@ onMounted(() => {
     authStore.setAuth(null, token)
     console.log('✅ Token guardado en store')
     
-    // Pequeña pausa para asegurar que todo se guardó correctamente
-    // antes de redirigir
+    // Usar router.push en lugar de window.location.href para que el router maneje correctamente
+    // la navegación y detecte que venimos de OAuth
     setTimeout(() => {
       console.log('🔄 Redirigiendo al dashboard...')
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
     }, 100)
   } catch (err) {
     console.error('❌ Error en callback:', err)
@@ -62,7 +62,7 @@ onMounted(() => {
         authStore.setAuth(null, token)
         console.log('✅ Token guardado en fallback, redirigiendo...')
         setTimeout(() => {
-          window.location.href = '/dashboard'
+          router.push('/dashboard')
         }, 100)
       } catch (fallbackErr) {
         console.error('❌ Error en fallback:', fallbackErr)
