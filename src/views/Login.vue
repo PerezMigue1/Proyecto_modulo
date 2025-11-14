@@ -152,6 +152,26 @@ onMounted(() => {
   console.log('🔗 Google Login URL:', googleLoginUrl.value)
   console.log('🔗 Facebook Login URL:', facebookLoginUrl.value)
   
+  // Si hay un token en la URL (puede venir de OAuth si el backend redirige incorrectamente)
+  if (route.query.token) {
+    console.log('🔄 Token detectado en URL de login, procesando...')
+    const token = route.query.token
+    
+    try {
+      // Guardar token en localStorage
+      localStorage.setItem('token', token)
+      authStore.setAuth(null, token)
+      console.log('✅ Token guardado desde login, redirigiendo al dashboard...')
+      
+      // Redirigir al dashboard
+      window.location.href = '/dashboard'
+      return
+    } catch (err) {
+      console.error('❌ Error al procesar token en login:', err)
+      error.value = 'Error al procesar la autenticación. Por favor, intenta de nuevo.'
+    }
+  }
+  
   if (route.query.error) {
     error.value = decodeURIComponent(route.query.error)
     console.error('❌ Error from route:', route.query.error)
