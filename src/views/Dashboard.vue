@@ -94,7 +94,17 @@ onMounted(async () => {
   // Función para intentar obtener usuario
   const attemptFetchUser = async (attemptNumber = 1) => {
     try {
+      // Sincronizar token antes de cada intento
+      const tokenFromStorage = localStorage.getItem('token')
+      if (tokenFromStorage && (!authStore.token || authStore.token !== tokenFromStorage)) {
+        console.log(`🔄 Intento ${attemptNumber}: Sincronizando token desde localStorage...`)
+        authStore.setAuth(null, tokenFromStorage)
+      }
+      
       console.log(`🔄 Intento ${attemptNumber} de obtener usuario...`)
+      console.log(`🔄 Token en store:`, authStore.token ? 'Presente' : 'No presente')
+      console.log(`🔄 Token en localStorage:`, tokenFromStorage ? 'Presente' : 'No presente')
+      
       const userData = await authStore.fetchUser()
       user.value = userData
       console.log('✅ Usuario obtenido del backend:', userData)
@@ -105,8 +115,20 @@ onMounted(async () => {
         status: error.response?.status,
         message: error.message,
         data: error.response?.data,
-        hasToken: !!authStore.token
+        hasToken: !!authStore.token,
+        hasTokenInStorage: !!localStorage.getItem('token')
       })
+      
+      // Si es un 401, verificar que el token todavía esté presente
+      if (error.response?.status === 401) {
+        const tokenStillExists = localStorage.getItem('token')
+        if (!tokenStillExists) {
+          console.error('❌ Token fue eliminado, no se puede reintentar')
+          return false
+        }
+        console.log('⚠️ Token todavía existe, se puede reintentar')
+      }
+      
       return false
     }
   }

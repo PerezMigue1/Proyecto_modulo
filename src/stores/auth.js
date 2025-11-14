@@ -69,7 +69,9 @@ export const useAuthStore = defineStore('auth', () => {
       error.value = null
       console.log('🔄 Obteniendo usuario del backend...')
       console.log('🔄 Token usado:', currentToken.substring(0, 20) + '...')
+      console.log('🔄 Token completo (primeros 50 chars):', currentToken.substring(0, 50))
       console.log('🔄 URL completa:', api.defaults.baseURL + '/user')
+      console.log('🔄 Header Authorization configurado:', api.defaults.headers.common['Authorization'] ? 'Sí' : 'No')
       
       const response = await api.get('/user')
       console.log('✅ Usuario obtenido:', response.data)
@@ -83,12 +85,17 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('❌ Error data:', err.response?.data)
       console.error('❌ Request config:', err.config)
       console.error('❌ Token en header:', err.config?.headers?.Authorization ? 'Presente' : 'No presente')
+      console.error('❌ Token completo en header:', err.config?.headers?.Authorization)
       
-      // Si es un error 401, limpiar auth
+      // NO limpiar el token inmediatamente en caso de 401
+      // Puede ser un problema temporal o de sincronización
+      // El Dashboard manejará los reintentos
       if (err.response?.status === 401) {
-        console.error('❌ Token inválido (401), limpiando auth...')
-        clearAuth()
+        console.error('⚠️ Error 401 al obtener usuario')
+        console.error('⚠️ NO limpiando token - puede ser un problema temporal')
+        console.error('⚠️ El Dashboard intentará nuevamente')
       }
+      
       throw err
     } finally {
       loading.value = false
