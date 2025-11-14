@@ -49,12 +49,9 @@ onMounted(async () => {
   // Tenemos token, procesarlo
   try {
     console.log('✅ Token recibido de OAuth, guardando en store...')
-    console.log('✅ Provider:', provider)
-    console.log('✅ Token (primeros 20 caracteres):', token.substring(0, 20) + '...')
     
-    // Guardar token en store PRIMERO y esperar a que se complete
+    // Guardar token en store y localStorage
     authStore.setAuth(null, token)
-    console.log('✅ Token guardado en store y localStorage')
     
     // Verificar que el token se guardó correctamente
     if (!authStore.token) {
@@ -63,51 +60,19 @@ onMounted(async () => {
       return
     }
     
-    console.log('✅ Token en store verificado:', authStore.token ? 'Presente' : 'No presente')
-    console.log('✅ Token en localStorage:', localStorage.getItem('token') ? 'Presente' : 'No presente')
-    
-    // Esperar un momento para asegurar que el token está completamente guardado
-    await new Promise(resolve => setTimeout(resolve, 100))
-    
-    // Intentar obtener usuario del backend (opcional, no bloquea la redirección)
-    try {
-      console.log('🔄 Intentando obtener usuario del backend...')
-      await authStore.fetchUser()
-      console.log('✅ Usuario obtenido exitosamente:', authStore.user?.email)
-    } catch (fetchError) {
-      console.warn('⚠️ No se pudo obtener usuario inmediatamente:', fetchError)
-      console.warn('⚠️ Error status:', fetchError.response?.status)
-      console.warn('⚠️ Esto no es crítico, el token está guardado y el dashboard lo obtendrá')
-      // No bloqueamos la redirección si falla obtener el usuario
-      // El dashboard intentará obtenerlo nuevamente
-    }
-    
-    // Redirigir al dashboard
-    console.log('✅ Redirigiendo al dashboard...')
-    console.log('✅ Token antes de redirección:', authStore.token ? 'Presente' : 'No presente')
-    console.log('✅ Token en localStorage antes de redirección:', localStorage.getItem('token') ? 'Presente' : 'No presente')
-    
-    // Usar window.location.href directamente para evitar problemas con el router guard
-    // Esto fuerza una recarga completa de la página con el token ya guardado
-    console.log('🔄 Forzando redirección con window.location.href...')
+    // Redirigir inmediatamente al dashboard
+    // El dashboard obtendrá el usuario automáticamente
     window.location.href = '/dashboard'
   } catch (err) {
-    console.error('❌ Error crítico en callback:', err)
-    console.error('❌ Error completo:', JSON.stringify(err, null, 2))
+    console.error('❌ Error en callback:', err)
     
-    // Solo limpiar auth si es un error crítico real
-    // Si el token está presente, intentar redirigir de todas formas
-    if (!token) {
+    // Si hay token, guardarlo y redirigir de todas formas
+    if (token) {
+      authStore.setAuth(null, token)
+      window.location.href = '/dashboard'
+    } else {
       authStore.clearAuth()
       router.push('/login?error=' + encodeURIComponent('Error al procesar la autenticación. Por favor, intenta de nuevo.'))
-    } else {
-      // El token está presente, guardarlo y redirigir al dashboard
-      console.warn('⚠️ Error no crítico, guardando token y redirigiendo al dashboard...')
-      authStore.setAuth(null, token)
-      // Esperar un momento y redirigir
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 100)
     }
   }
 })

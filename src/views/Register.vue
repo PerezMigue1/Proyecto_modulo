@@ -768,6 +768,8 @@ input:valid {
 .terms-container {
   margin: 16px 0;
   padding: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .terms-checkbox {
@@ -777,7 +779,9 @@ input:valid {
   margin: 0;
   padding: 0;
   user-select: none;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 .terms-checkbox-input {
@@ -803,6 +807,9 @@ input:valid {
   display: block;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .terms-link {
@@ -990,11 +997,16 @@ input:valid {
 
   .terms-container {
     margin: 14px 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .terms-checkbox {
     align-items: flex-start;
     gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .terms-checkbox-input {
@@ -1008,10 +1020,15 @@ input:valid {
   .terms-label {
     font-size: 13px;
     line-height: 1.5;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .terms-link {
     font-size: 13px;
+    word-break: break-word;
+    white-space: normal;
   }
 }
 
