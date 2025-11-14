@@ -63,11 +63,12 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     
-    // Si viene de OAuth callback o si acabamos de guardar el token, permitir acceso directo
-    // No intentar obtener usuario aquí, el dashboard lo hará
+    // Si viene de OAuth callback, permitir acceso directo SIN ninguna autenticación adicional
+    // Solo el token es suficiente - no se requiere obtener usuario ni verificar nada más
     if (from.path === '/auth/callback' || from.name === 'auth-callback') {
       console.log('✅ Viniendo de OAuth callback, permitiendo acceso directo')
       console.log('✅ Token presente:', token ? 'Sí' : 'No')
+      console.log('✅ No se requiere ninguna autenticación adicional')
       next()
       return
     }

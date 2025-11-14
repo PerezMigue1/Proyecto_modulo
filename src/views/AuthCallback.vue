@@ -76,9 +76,11 @@ onMounted(async () => {
     }
     
     console.log('✅ Token guardado correctamente, redirigiendo al dashboard...')
+    console.log('✅ No se requiere ninguna autenticación adicional - solo el token es suficiente')
     
     // Usar window.location.href para forzar una recarga completa
     // Esto asegura que el router guard vea el token en localStorage
+    // No se intenta obtener el usuario aquí - el dashboard lo hará de forma asíncrona
     window.location.href = '/dashboard'
   } catch (err) {
     console.error('❌ Error en callback:', err)

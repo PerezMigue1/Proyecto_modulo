@@ -70,17 +70,22 @@ onMounted(async () => {
     return
   }
   
-  // Si no tenemos el usuario, intentar obtenerlo
-  try {
-    user.value = await authStore.fetchUser()
-  } catch (error) {
-    console.error('Error al obtener usuario en dashboard:', error)
-    // Solo redirigir si es un error 401 (token inválido)
-    if (error.response?.status === 401) {
-      router.push('/login')
-    }
-    // Para otros errores, mostrar el error pero no redirigir
-  }
+  // Si no tenemos el usuario, intentar obtenerlo de forma asíncrona
+  // No bloquear la renderización del dashboard
+  // Esto es especialmente importante después de OAuth donde solo tenemos el token
+  authStore.fetchUser()
+    .then(userData => {
+      user.value = userData
+    })
+    .catch(error => {
+      console.error('Error al obtener usuario en dashboard:', error)
+      // Solo redirigir si es un error 401 (token inválido) y no hay token
+      if (error.response?.status === 401 && !localStorage.getItem('token')) {
+        router.push('/login')
+      }
+      // Para otros errores, el dashboard se mostrará sin datos del usuario
+      // pero el usuario está autenticado (tiene token)
+    })
 })
 
 async function handleLogout() {
