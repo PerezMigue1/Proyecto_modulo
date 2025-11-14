@@ -62,21 +62,10 @@ onMounted(async () => {
     }
     
     console.log('✅ Token verificado correctamente')
-    
-    // Intentar obtener los datos del usuario antes de redirigir
-    // Esto asegura que el nombre aparezca inmediatamente en el dashboard
-    console.log('🔄 Obteniendo datos del usuario...')
-    try {
-      const userData = await authStore.fetchUser()
-      console.log('✅ Usuario obtenido:', userData)
-      // El usuario ya está guardado en el store por fetchUser
-    } catch (userError) {
-      console.warn('⚠️ No se pudo obtener usuario ahora, se intentará en el dashboard:', userError)
-      // Continuar de todas formas - el dashboard intentará obtenerlo
-    }
-    
     console.log('🔄 Redirigiendo al dashboard...')
     
+    // NO intentar obtener usuario aquí - puede fallar y bloquear la redirección
+    // El dashboard se encargará de obtener los datos del usuario
     // Usar window.location.href para forzar recarga completa
     // Esto asegura que el token esté disponible cuando el router guard se ejecute
     window.location.href = '/dashboard'
@@ -88,15 +77,6 @@ onMounted(async () => {
         localStorage.setItem('token', token)
         authStore.setAuth(null, token)
         console.log('✅ Token guardado en fallback')
-        
-        // Intentar obtener usuario
-        try {
-          await authStore.fetchUser()
-          console.log('✅ Usuario obtenido en fallback')
-        } catch (userError) {
-          console.warn('⚠️ No se pudo obtener usuario en fallback:', userError)
-        }
-        
         console.log('🔄 Redirigiendo al dashboard...')
         window.location.href = '/dashboard'
       } catch (fallbackErr) {

@@ -88,15 +88,11 @@ onMounted(async () => {
       data: error.response?.data
     })
     
-    // Si es un error 401, el token es inválido
-    if (error.response?.status === 401) {
-      console.error('❌ Token inválido, redirigiendo al login...')
-      router.push('/login')
-      return
-    }
+    // NO redirigir al login inmediatamente - puede ser un problema temporal
+    // Especialmente después de OAuth, el token puede necesitar un momento para ser válido
+    // Solo redirigir si el error persiste después de varios intentos
     
-    // Para otros errores, mostrar el dashboard sin datos del usuario
-    // pero intentar de nuevo después de un tiempo
+    // Intentar de nuevo después de un tiempo
     console.log('⚠️ Mostrando dashboard sin datos del usuario, reintentando en 2 segundos...')
     setTimeout(async () => {
       try {
@@ -105,6 +101,25 @@ onMounted(async () => {
         console.log('✅ Usuario obtenido en segundo intento:', userData)
       } catch (retryError) {
         console.error('❌ Error en segundo intento:', retryError)
+        
+        // Solo después del segundo intento fallido, verificar si es 401
+        // y esperar un poco más antes de redirigir
+        if (retryError.response?.status === 401) {
+          console.log('⚠️ Error 401 en segundo intento, esperando 3 segundos más...')
+          setTimeout(async () => {
+            try {
+              const userData = await authStore.fetchUser()
+              user.value = userData
+              console.log('✅ Usuario obtenido en tercer intento:', userData)
+            } catch (finalError) {
+              // Solo después de 3 intentos fallidos, considerar el token inválido
+              if (finalError.response?.status === 401) {
+                console.error('❌ Token inválido después de 3 intentos, redirigiendo al login...')
+                router.push('/login')
+              }
+            }
+          }, 3000)
+        }
       }
     }, 2000)
   }
