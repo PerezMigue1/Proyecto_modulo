@@ -60,16 +60,16 @@ onMounted(async () => {
       return
     }
     
-    // Redirigir inmediatamente al dashboard
-    // El dashboard obtendrá el usuario automáticamente
-    window.location.href = '/dashboard'
+    // Redirigir inmediatamente al dashboard sin ninguna verificación adicional
+    // El token es suficiente para autenticación, no se requiere obtener usuario aquí
+    router.push('/dashboard')
   } catch (err) {
     console.error('❌ Error en callback:', err)
     
     // Si hay token, guardarlo y redirigir de todas formas
     if (token) {
       authStore.setAuth(null, token)
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
     } else {
       authStore.clearAuth()
       router.push('/login?error=' + encodeURIComponent('Error al procesar la autenticación. Por favor, intenta de nuevo.'))

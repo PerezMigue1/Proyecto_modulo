@@ -59,38 +59,45 @@ router.beforeEach(async (to, from, next) => {
     if (!token) {
       // No hay token, redirigir al login
       console.log('❌ No hay token, redirigiendo al login')
-      console.log('❌ Ruta actual:', to.path)
-      console.log('❌ Ruta anterior:', from.path)
       next('/login')
       return
     }
     
-    console.log('✅ Token encontrado, verificando usuario...')
+    // Si viene de OAuth callback, solo verificar token y permitir acceso
+    // No intentar obtener usuario aquí, el dashboard lo hará
+    if (from.path === '/auth/callback') {
+      console.log('✅ Viniendo de OAuth callback, permitiendo acceso directo')
+      next()
+      return
+    }
     
-    // Hay token, verificar si tenemos el usuario
-    // Si ya lo tenemos (por ejemplo, después del login o OAuth), no hacer petición
-    if (!authStore.user) {
-      try {
-        console.log('🔄 Obteniendo usuario del backend...')
-        await authStore.fetchUser()
-        console.log('✅ Usuario obtenido:', authStore.user?.email)
-      } catch (error) {
-        console.error('❌ Error al obtener usuario:', error)
-        console.error('❌ Error status:', error.response?.status)
-        console.error('❌ Error data:', error.response?.data)
-        
-        // Si es un error 401 (token inválido), limpiar auth y redirigir
-        if (error.response?.status === 401) {
-          console.error('❌ Token inválido (401), limpiando auth...')
-          authStore.clearAuth()
-          next('/login')
-          return
-        }
-        // Para otros errores (red, servidor, etc.), permitir acceso
-        // El dashboard intentará obtener el usuario nuevamente
-        console.warn('⚠️ Error al obtener usuario, pero permitiendo acceso al dashboard')
-        console.warn('⚠️ El token está presente, el dashboard manejará el error')
+    console.log('✅ Token encontrado')
+    
+    // Si ya tenemos el usuario, no hacer petición
+    if (authStore.user) {
+      console.log('✅ Usuario ya disponible en store')
+      next()
+      return
+    }
+    
+    // Intentar obtener usuario solo si no viene de OAuth
+    // Pero no bloquear el acceso si falla (excepto 401)
+    try {
+      console.log('🔄 Obteniendo usuario del backend...')
+      await authStore.fetchUser()
+      console.log('✅ Usuario obtenido:', authStore.user?.email)
+    } catch (error) {
+      console.error('❌ Error al obtener usuario:', error)
+      
+      // Solo bloquear si es un error 401 (token inválido)
+      if (error.response?.status === 401) {
+        console.error('❌ Token inválido (401), limpiando auth...')
+        authStore.clearAuth()
+        next('/login')
+        return
       }
+      // Para otros errores, permitir acceso - el dashboard manejará el error
+      console.warn('⚠️ Error al obtener usuario, pero permitiendo acceso')
     }
     
     // Usuario autenticado (tiene token), permitir acceso
